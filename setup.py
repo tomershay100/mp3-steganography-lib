@@ -1,12 +1,9 @@
-import os
-
 import setuptools
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-requirements_path = os.path.join(os.path.dirname(__file__), "requirements.txt")
-with open(requirements_path, "r") as f:
+with open("requirements.txt", "r") as f:
     dependencies = list(f)
 
 setuptools.setup(

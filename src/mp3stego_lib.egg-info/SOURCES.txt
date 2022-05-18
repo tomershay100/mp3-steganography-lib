@@ -22,4 +22,5 @@ src/mp3stego/encoder/util.py
 src/mp3stego_lib.egg-info/PKG-INFO
 src/mp3stego_lib.egg-info/SOURCES.txt
 src/mp3stego_lib.egg-info/dependency_links.txt
+src/mp3stego_lib.egg-info/requires.txt
 src/mp3stego_lib.egg-info/top_level.txt
