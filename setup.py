@@ -14,7 +14,7 @@ if os.path.isfile(requirementPath):
 
 setuptools.setup(
     name="mp3stego-lib",
-    version="0.1.0",
+    version="0.1.1",
     author="Aviad Seady, Tomer Shay, Lee Zaid",
     author_email="aviadevelops@gmail.com, tomershay100@gmail.com, lizizaid@gmail.com",
     description="A mp3 decode and encode library",
