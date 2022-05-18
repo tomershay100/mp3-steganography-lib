@@ -31,7 +31,7 @@ class Stego:
     def stego(self, stego: bool):
         self.__stego = stego
 
-    def run(self, quiet: bool = False):
+    def run(self, data: str = "", quiet: bool = True):
         start_time = time.time()
         if not quiet:
             print("Start parsing the file")
@@ -39,7 +39,8 @@ class Stego:
         parse_time = time.time()
         if not quiet:
             print(f"File decoding time took {int(parse_time - start_time)} seconds")
-        encode(self.__input_file_path[:-3] + 'wav', self.__output_file_path, bitrate)
+        encode(self.__input_file_path[:-3] + 'wav', self.__output_file_path, bitrate, quiet)
+        # TODO create child class from encode, and if data is not empty, use the new class with steganography option
         end_time = time.time()
         if not quiet:
             print(f"File encoding time took {int(end_time - parse_time)} seconds")
