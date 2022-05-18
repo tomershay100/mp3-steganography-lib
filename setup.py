@@ -1,19 +1,25 @@
+import os
+
 import setuptools
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
+requirements_path = os.path.join(os.path.dirname(__file__), "requirements.txt")
+with open(requirements_path, "r") as f:
+    dependencies = list(f)
+
 setuptools.setup(
     name="mp3stego-lib",
-    version="0.0.13",
-    author="Seady, Shay, Zaid",
-    author_email="tomershay100@gmail.com",
+    version="0.1.0",
+    author="Aviad Seady, Tomer Shay, Lee Zaid",
+    author_email="aviadevelops@gmail.com, tomershay100@gmail.com, lizizaid@gmail.com",
     description="A mp3 decode and encode library",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/tomershay100/MP3-Steganography",
+    url="https://github.com/tomershay100/mp3-steganography-lib",
     project_urls={
-        "Bug Tracker": "https://github.com/tomershay100/MP3-Steganography/issues",
+        "Bug Tracker": "https://github.com/tomershay100/mp3-steganography-lib/issues",
     },
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -25,4 +31,5 @@ setuptools.setup(
         setuptools.find_packages(where="src")
     ),
     python_requires=">=3.6",
+    install_requires=dependencies
 )

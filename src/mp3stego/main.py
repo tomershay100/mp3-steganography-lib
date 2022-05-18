@@ -9,7 +9,6 @@ from mp3stego.encoder.main import encode
 
 # TODO create child class from encode, and if data is not empty, use the new class with steganography option
 # TODO add more information prints when quiet is off
-# TODO add requirements
 class Stego:
     def __init__(self, input_file_path, output_file_path='.'):
         self.__input_file_path = input_file_path
