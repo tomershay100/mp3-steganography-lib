@@ -5,7 +5,9 @@ Summary: A mp3 decode and encode library
 Home-page: https://github.com/tomershay100/MP3-Steganography
 Author: Seady, Shay, Zaid
 Author-email: tomershay100@gmail.com
+License: UNKNOWN
 Project-URL: Bug Tracker, https://github.com/tomershay100/MP3-Steganography/issues
+Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
@@ -14,3 +16,4 @@ Description-Content-Type: text/markdown
 License-File: LICENSE
 
 # MP3-Steganography
+
