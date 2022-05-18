@@ -3,8 +3,14 @@ import setuptools
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-with open("requirements.txt", "r") as f:
-    dependencies = list(f)
+import os
+
+the_lib_folder = os.path.dirname(os.path.realpath(__file__))
+requirementPath = the_lib_folder + '/requirements.txt'
+install_requires = []
+if os.path.isfile(requirementPath):
+    with open(requirementPath) as f:
+        install_requires = f.read().splitlines()
 
 setuptools.setup(
     name="mp3stego-lib",
@@ -28,5 +34,5 @@ setuptools.setup(
         setuptools.find_packages(where="src")
     ),
     python_requires=">=3.6",
-    install_requires=dependencies
+    install_requires=install_requires
 )
