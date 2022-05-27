@@ -51,6 +51,7 @@ def create_sine_block():
 class Frame:
     def __init__(self):
         # Declarations
+        self.__pcm: np.ndarray = np.array([])
         self.__buffer: list = []
         self.__prev_frame_size: np.ndarray = np.zeros(NUM_PREV_FRAMES)
         self.__frame_size: int = 0
@@ -61,9 +62,10 @@ class Frame:
 
         self.__main_data: list = []
         self.__samples: np.ndarray = np.zeros((2, 2, NUM_OF_SAMPLES))
-        self.__pcm: np.ndarray
         self.__sine_block = create_sine_block()
         self.__synth_filterbank_block = init_synth_filterbank_block()
+
+        self.all_huffman_tables = []
 
     def init_frame_params(self, buffer, file_data, curr_offset):
         self.__buffer = buffer
@@ -73,6 +75,7 @@ class Frame:
 
         starting_side_info_idx = 6 if self.__header.crc == 0 else 4
         self.__side_info.set_side_info(self.__buffer[starting_side_info_idx:], self.__header)
+        self.all_huffman_tables.append(self.__get_frame_huffman_tables())
         self.__set_main_data(file_data, curr_offset)
 
         for gr in range(2):
@@ -94,8 +97,10 @@ class Frame:
 
         self.__interleave()
 
-    # Determine the frame size.
     def set_frame_size(self):
+        """
+        Determine the frame size.
+        """
         samples_per_frame = 0
 
         if self.__header.layer == 3:
@@ -122,9 +127,14 @@ class Frame:
         if self.__header.padding == 1:
             self.frame_size += 1
 
-    # Due to the Huffman bits' varying length the main_data isn't aligned with the frames.
-    # Unpacks the scaling factors and quantized samples.
     def __set_main_data(self, file_data: list, curr_offset: int):
+        """
+        Due to the Huffman bits' varying length the main_data isn't aligned with the frames. Unpacks the scaling factors
+        and quantized samples.
+        :param file_data: buffer that contains the mp3 file
+        :param curr_offset: the offset from the file_data that points to the first byte of the frame header.
+        """
+        # header + side_information
         constant = 21 if self.__header.channel_mode == ChannelMode.Mono else 36
         if self.__header.crc == 0:
             constant += 2
@@ -163,11 +173,16 @@ class Frame:
                 self.__unpack_samples(gr, ch, bit, max_bit)
                 bit = max_bit
 
-    # Unpack the scale factor indices from the main data. slen1 and slen2 are the size (in bits) of each scaling factor.
-    # There are 21 scaling factors for long windows and 12 for each short window.
     def __unpack_scalefac(self, gr: int, ch: int, bit: int):
-        sfb = 0
-        window = 0
+        """
+        Unpack the scale factor indices from the main data. slen1 and slen2 are the size (in bits) of each scaling
+        factor. There are 21 scaling factors for long windows and 12 for each short window.
+        :param gr: the granule
+        :param ch: the channel
+        :param bit:
+        """
+        sfb: int
+        window: int
         scalefactor_length = [slen[int(self.__side_info.scalefac_compress[gr][ch])][0],
                               slen[int(self.__side_info.scalefac_compress[gr][ch])][1]]
 
@@ -236,6 +251,16 @@ class Frame:
         return bit
 
     def __unpack_samples(self, gr, ch, bit, max_bit):
+        """
+        The Huffman bits (part3) will be unpacked. Four bytes are retrieved from the bit stream, and are consecutively
+        evaluated against values of the selected Huffman tables.
+        | big_value | big_value | big_value | quadruple | zero |
+        Each hit gives two samples.
+        :param gr: the granule
+        :param ch: the channel
+        :param bit:
+        :param max_bit:
+        """
         for i in range(NUM_OF_SAMPLES):
             self.__samples[gr][ch][i] = 0
 
@@ -267,6 +292,7 @@ class Frame:
                 continue
 
             repeat = True
+            # The main_data is buffer that containing the main data excluding the frame header and side info.
             bit_sample = util.get_bits(self.__main_data, bit, 32)
 
             # Cycle through the Huffman table and find a matching bit pattern.
@@ -341,9 +367,14 @@ class Frame:
             self.__samples[gr][ch][sample] = 0
             sample += 1
 
-    # The reduced samples are rescaled to their original scales and precisions.
     def __requantize(self, gr: int, ch: int):
-        exp1, exp2 = 0.0, 0.0
+        """
+        The reduced samples are rescaled to their original scales and precisions.
+        :param gr: the granule
+        :param ch: the channel
+        """
+        exp1: float
+        exp2: float
         window = 0
         sfb = 0
         SCALEFAC_MULT = 0.5 if self.__side_info.scalefac_scale[gr][ch] == 0 else 1
@@ -374,7 +405,7 @@ class Frame:
 
                 pretab_val = tables.pretab[sfb] if sfb < len(tables.pretab) else 0
                 exp2 = SCALEFAC_MULT * (
-                    self.__side_info.scalefac_l[gr][ch][sfb] + self.__side_info.preflag[gr][ch] * pretab_val)
+                        self.__side_info.scalefac_l[gr][ch][sfb] + self.__side_info.preflag[gr][ch] * pretab_val)
 
             sign = -1.0 if self.__samples[gr][ch][sample] < 0 else 1.0
             a = pow(abs(self.__samples[gr][ch][sample]), 4.0 / 3.0)
@@ -386,17 +417,25 @@ class Frame:
             sample += 1
             i += 1
 
-    #  The left and right channels are added together to form the middle channel. The
-    #  difference between each channel is stored in the side channel.
     def __ms_stereo(self, gr: int):
+        """
+        The left and right channels are added together to form the middle channel. The
+        difference between each channel is stored in the side channel.
+        :param gr: the granule
+        """
         for sample in range(NUM_OF_SAMPLES):
             middle = self.__samples[gr][0][sample]
             side = self.__samples[gr][1][sample]
             self.__samples[gr][0][sample] = (middle + side) / SQRT2
             self.__samples[gr][1][sample] = (middle - side) / SQRT2
 
-    # Reorder short blocks, mapping from scalefactor subbands (for short windows) to 18 sample blocks.
     def __reorder(self, gr: int, ch: int):
+        """
+        Reorder short blocks, mapping from scalefactor subbands (for short windows) to 18 sample blocks.
+        :param gr: the granule
+        :param ch: the channel
+        :return:
+        """
         total = 0
         start = 0
         block = 0
@@ -421,6 +460,10 @@ class Frame:
             self.__samples[gr][ch][i] = samples[i]
 
     def __alias_reduction(self, gr: int, ch: int):
+        """
+        :param gr: the granule
+        :param ch: the channel
+        """
         cs = [.8574929257, .8817419973, .9496286491, .9833145925, .9955178161, .9991605582, .9998991952, .9999931551]
         ca = [-.5144957554, -.4717319686, -.3133774542, -.1819131996, -.0945741925, -.0409655829, -.0141985686,
               -.0036999747]
@@ -436,9 +479,13 @@ class Frame:
                 self.__samples[gr][ch][offset1] = s1 * cs[sample] - s2 * ca[sample]
                 self.__samples[gr][ch][offset2] = s2 * cs[sample] + s1 * ca[sample]
 
-    # Inverted modified discrete cosine transformations (IMDCT) are applied to each sample and are afterwards windowed
-    # to fit their window shape. As an addition, the samples are overlapped.
     def __imdct(self, gr: int, ch: int):
+        """
+        Inverted modified discrete cosine transformations (IMDCT) are applied to each sample and are afterwards windowed
+        to fit their window shape. As an addition, the samples are overlapped.
+        :param gr: the granule
+        :param ch: the channel
+        """
         sample_block = np.zeros(36)
         n = 12 if self.side_info.block_type[gr][ch] == 2 else 36
         half_n = int(n / 2)
@@ -477,12 +524,19 @@ class Frame:
             sample += 18
 
     def __frequency_inversion(self, gr: int, ch: int):
+        """
+        :param gr: the granule
+        :param ch: the channel
+        """
         for sb in range(1, 18, 2):
             for i in range(1, 32, 2):
                 self.__samples[gr][ch][i * 18 + sb] *= -1
 
     def __synth_filterbank(self, gr: int, ch: int):
-
+        """
+        :param gr: the granule
+        :param ch: the channel
+        """
         s, u, w = np.zeros(32), np.zeros(512), np.zeros(512)
         pcm = np.zeros(576)
 
@@ -553,3 +607,14 @@ class Frame:
 
     def get_bitrate(self):
         return self.__header.bit_rate
+
+    def __get_frame_huffman_tables(self):  # TODO
+        """
+        :return: list that contains all the huffman tables used in that frame
+        """
+        tmp = []
+        for ch in range(self.__header.channels):
+            for gr in range(2):
+                for region in range(3):
+                    tmp.append(int(self.__side_info.table_select[gr][ch][region]))
+        return tmp

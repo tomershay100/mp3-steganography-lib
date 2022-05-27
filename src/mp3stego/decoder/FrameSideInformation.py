@@ -35,6 +35,11 @@ class FrameSideInformation:
         self.__scalefac_s: np.ndarray = np.zeros((2, 2, 3, 13))
 
     def set_side_info(self, buffer: list, header: FrameHeader):
+        """
+        The side information contains information on how to decode the main_data.
+        :param buffer: buffer that contains the mp3 file, from the first byte of the side info.
+        :param header: The frame header
+        """
         offset = 0
 
         # Get main data begin pointer from buffer

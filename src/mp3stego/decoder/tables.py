@@ -1,5 +1,8 @@
 # Tables for Huffman decoding, inverse quantization, the synthetic filter bank, etc.
+from dataclasses import dataclass
 
+
+@dataclass
 class BandWidthTable:
     def __init__(self):
         self.long_32 = [4, 4, 4, 4, 4, 4, 6, 6, 8, 10, 12, 16, 20, 24, 30, 38, 46, 56, 68, 84, 102]
@@ -10,6 +13,7 @@ class BandWidthTable:
         self.short_48 = [4, 4, 4, 4, 6, 6, 10, 12, 14, 16, 20, 26]
 
 
+@dataclass
 class BandIndexTable:
     def __init__(self):
         self.long_32 = [0, 4, 8, 12, 16, 20, 24, 30, 36, 44, 54, 66, 82,
@@ -23,6 +27,7 @@ class BandIndexTable:
         self.short_48 = [0, 4, 8, 12, 16, 22, 28, 38, 50, 64, 80, 100, 126, 192]
 
 
+@dataclass
 class QuadTable:
     def __init__(self):
         self.value = [[0, 0, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0], [0, 0, 1, 1], [0, 1, 0, 0], [0, 1, 0, 1],
@@ -53,6 +58,7 @@ def unpack_table(hft):
     return unpacked_table
 
 
+# all the huffman tables
 hft_0 = unpack_table([[[0x0, 1]]])
 hft_1 = unpack_table([[[0x80000000, 1], [0x20000000, 3]], [[0x40000000, 2], [0x0, 3]]])
 hft_2 = unpack_table(

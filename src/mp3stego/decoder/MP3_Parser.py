@@ -1,5 +1,3 @@
-# import numpy as np
-
 from scipy.io.wavfile import write
 from tqdm import tqdm
 
@@ -9,10 +7,16 @@ HEADER_SIZE = 4
 
 
 class MP3Parser:
+    """
+    Class for parsing mp3 files into wav file.
 
-    def __init__(self, file_data, offset, file_path):
+    :param file_data: buffer for the file hexadecimal data.
+    :param offset: offset for the file to begin after the id3.
+    :param wav_file_path: the output .wav file path
+    """
+
+    def __init__(self, file_data, offset, wav_file_path):
         # Declarations
-        # self.__curr_header: FrameHeader = FrameHeader()
         self.__curr_frame: Frame = Frame()
         self.__valid: bool = False
         # List of integers that contain the file (without ID3) data
@@ -20,8 +24,8 @@ class MP3Parser:
         self.__buffer: list = []
         self.__pcm_data: np.array = np.array([])
         self.__file_length: int = 0
-        self.__file_path = file_path
-        self.__new_file_path = self.__file_path[:-4] + '.wav'
+        # self.__file_path = file_path
+        self.__wav_file_path = wav_file_path
 
         # cut the id3 from hex_data
         self.__buffer = file_data[offset:]
@@ -35,6 +39,8 @@ class MP3Parser:
             self.__curr_frame.set_frame_size()
         else:
             self.__valid = False
+
+        self.output_bits = ""
 
     def __init_curr_header(self):
         if self.__buffer[0] == 0xFF and self.__buffer[1] >= 0xE0:
@@ -54,6 +60,8 @@ class MP3Parser:
             self.__init_curr_header()
             if self.__valid:
                 self.__init_curr_frame()
+                # get all bits from the huffman tables
+                self.output_bits += util.bit_from_huffman_tables(self.__curr_frame.all_huffman_tables)
                 num_of_parsed_frames += 1
                 self.__offset += self.__curr_frame.frame_size
                 self.__buffer = self.__file_data[self.__offset:]
@@ -69,8 +77,7 @@ class MP3Parser:
 
     def write_to_wav(self):
         # Convert PCM to WAV (from 32-bit floating-point to 16-bit PCM by mult by 32767)
-        write(self.__new_file_path, self.__curr_frame.sampling_rate, (self.__pcm_data * 32767).astype(np.int16))
-        return self.__new_file_path
+        write(self.__wav_file_path, self.__curr_frame.sampling_rate, (self.__pcm_data * 32767).astype(np.int16))
 
     def get_bitrate(self):
         return self.__curr_frame.get_bitrate()

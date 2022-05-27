@@ -1,8 +1,12 @@
 import sys
+from dataclasses import dataclass
 
 BYTE_LENGTH = 8
 
+H0 = {3, 6, 8, 11, 12, 15, 17, 19, 21, 23, 24, 26, 28, 30}
 
+
+@dataclass
 class Offset:
     def __init__(self):
         self.__offset: int = 0
@@ -20,6 +24,11 @@ def bytes_to_int(byte_list: bytes):
 
 
 def char_to_int(four_bytes: list):
+    """
+    Puts four bytes into a single four byte integer type.
+    :param four_bytes:
+    :return:
+    """
     num = 0x00
     for i in range(4):
         num = (num << 7) + four_bytes[i]
@@ -37,6 +46,13 @@ def left_shift_char(a: bytes, b: int):
 
 
 def get_bits(buffer: list, start_bit: int, slice_len: int):
+    """
+    Assumes that end_bit is greater than start_bit and that the result is less than 32 bits, length of an unsigned type.
+    :param buffer:
+    :param start_bit:
+    :param slice_len:
+    :return:
+    """
     # exclude the last bit of the slice
     end_bit = start_bit + slice_len - 1
 
@@ -70,3 +86,18 @@ def get_bits(buffer: list, start_bit: int, slice_len: int):
         result += (2 ** i) * bit_slice[i]
 
     return result
+
+
+def bit_from_huffman_tables(all_huffman_tables):
+    """
+    calc the bits from the huffman tables, according to the steganography
+    :param all_huffman_tables:
+    :return: string contains bits
+    """
+
+    s = ""
+    for x in all_huffman_tables[-1]:
+        if x == 0:
+            continue
+        s += "0" if x in H0 else "1"
+    return s

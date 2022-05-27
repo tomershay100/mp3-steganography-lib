@@ -71,6 +71,9 @@ class ID3Frame:
         return flags
 
 
+# ID3 contains meta data irrelevant to the decoder. The header contains an
+# offset used to determine the location of the first MP3 header.
+# | Header | Additional header (optional) | Meta Data | Footer (optional) |
 class ID3:
     def __init__(self, buffer: list):
         # Declarations

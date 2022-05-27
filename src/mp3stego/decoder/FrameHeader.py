@@ -44,9 +44,11 @@ class FrameHeader:
         self.__band_index: Band = Band()
         self.__band_width: Band = Band()
 
-    # Unpack the MP3 header.
-    # @param buffer A pointer that points to the first byte of the frame header.
     def init_header_params(self, buffer):
+        """
+        Unpack the MP3 header.
+        :param buffer: buffer that contains the mp3 file bytes, starts with the first bytes of teh header.
+        """
         self.__buffer = buffer
         self.__set_mpeg_version()
         self.__set_layer(self.__buffer[1])
@@ -60,8 +62,10 @@ class FrameHeader:
         self.__set_padding()
         self.__set_bit_rate()
 
-    # Determine the MPEG version.
     def __set_mpeg_version(self):
+        """
+        Determine the MPEG version.
+        """
         if (self.__buffer[1] & 0x10) == 0x10 and (self.__buffer[1] & 0x08) == 0x08:
             self.__mpeg_version = 1
         elif (self.__buffer[1] & 0x10) == 0x10 and (self.__buffer[1] & 0x08) != 0x08:
@@ -71,26 +75,38 @@ class FrameHeader:
         elif (self.__buffer[1] & 0x10) != 0x10 and (self.__buffer[1] & 0x08) != 0x08:
             self.__mpeg_version = 2.5
 
-    # Determine layer
     def __set_layer(self, byte):
+        """
+        Determine layer
+        :param byte: the first byte of the header
+        """
         byte = (byte << 5) % MAX_BYTE_VALUE
         byte = (byte >> 6) % MAX_BYTE_VALUE
         self.__layer = 4 - byte
 
-    # Cyclic redundancy check. If set, two bytes after the header information are used up by the CRC.
     def __set_crc(self):
+        """
+        Cyclic redundancy check. If set, two bytes after the header information are used up by the CRC.
+        """
         self.__crc = self.__buffer[1] & 0x01
 
-    # Additional information (not important)
     def __set_info(self):
+        """
+        Additional information (not important)
+        """
         self.__info = [bool(self.__buffer[2] & 0x01), bool(self.__buffer[3] & 0x08), bool(self.__buffer[3] & 0x04)]
 
-    # Although rarely used, there is no method for emphasis.
     def __set_emphasis(self):
-        value = (((self.__buffer[3] << 6)) % MAX_BYTE_VALUE >> 6) % MAX_BYTE_VALUE
+        """
+        Although rarely used, there is no method for emphasis.
+        """
+        value = ((self.__buffer[3] << 6) % MAX_BYTE_VALUE >> 6) % MAX_BYTE_VALUE
         self.__emphasis = Emphasis(value)
 
     def __set_sampling_rate(self):
+        """
+        Sampling rate
+        """
         rates = [[44100, 48000, 32000], [22050, 24000, 16000], [11025, 12000, 8000]]
         ceil_mpeg_version = int(math.floor(self.__mpeg_version))
         if (self.__buffer[2] & 0x08) != 0x08 and (self.__buffer[2] & 0x04) != 0x04:
@@ -100,8 +116,11 @@ class FrameHeader:
         elif (self.__buffer[2] & 0x08) == 0x08 and (self.__buffer[2] & 0x04) != 0x04:
             self.__sampling_rate = rates[ceil_mpeg_version - 1][2]
 
-    # During the decoding process different tables are used depending on the sampling rate.
     def __set_tables(self):
+        """
+        During the decoding process different tables are used depending on the sampling rate.
+        :return:
+        """
         if self.__sampling_rate == 32000:
             self.__band_index.short_win = band_index_table.short_32
             self.__band_width.short_win = band_width_table.short_32
@@ -118,26 +137,34 @@ class FrameHeader:
             self.__band_index.long_win = band_index_table.long_48
             self.__band_width.long_win = band_width_table.long_48
 
-    # 0 -> Stereo
-    # 1 -> Joint stereo (this option requires use of mode_extension)
-    # 2 -> Dual channel
-    # 3 -> Single channel
     def __set_channel_mode(self):
+        """
+        0 -> Stereo
+        1 -> Joint stereo (this option requires use of mode_extension)
+        2 -> Dual channel
+        3 -> Single channel
+        """
         value = (self.__buffer[3] >> 6) % MAX_BYTE_VALUE
         self.__channel_mode = ChannelMode(value)
         self.__channels = 1 if self.__channel_mode == ChannelMode.Mono else 2
 
-    # Applies only to joint stereo.
     def __set_mode_extension(self):
+        """
+        Applies only to joint stereo.
+        """
         if self.__layer == 3:
             self.__mode_extension = [self.__buffer[3] & 0x20, self.__buffer[3] & 0x10]
 
-    # If set, the frame size is 1 byte larger.
     def __set_padding(self):
+        """
+        If set, the frame size is 1 byte larger.
+        """
         self.__padding = bool(self.__buffer[2] & 0x02)
 
-    # For variable bit rate (VBR) files, this data has to be gathered constantly.
     def __set_bit_rate(self):
+        """
+        For variable bit rate (VBR) files, this data has to be gathered constantly.
+        """
         if self.__mpeg_version == 1:
             if self.__layer == 1:
                 self.__bit_rate = self.__buffer[2] * 32

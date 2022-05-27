@@ -14,7 +14,7 @@ if os.path.isfile(requirementPath):
 
 setuptools.setup(
     name="mp3stego-lib",
-    version="0.1.3",
+    version="0.2.1",
     author="Aviad Seady, Tomer Shay, Lee Zaid",
     author_email="aviadevelops@gmail.com, tomershay100@gmail.com, lizizaid@gmail.com",
     description="A mp3 decode and encode library",
@@ -33,6 +33,6 @@ setuptools.setup(
     packages=(
         setuptools.find_packages(where="src")
     ),
-    python_requires=">=3.6",
+    python_requires=">=3.9",
     install_requires=install_requires
 )
