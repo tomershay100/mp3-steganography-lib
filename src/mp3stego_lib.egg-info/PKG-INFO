@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: mp3stego-lib
-Version: 0.2.1
+Version: 0.2.2
 Summary: A mp3 decode and encode library
 Home-page: https://github.com/tomershay100/mp3-steganography-lib
 Author: Aviad Seady, Tomer Shay, Lee Zaid

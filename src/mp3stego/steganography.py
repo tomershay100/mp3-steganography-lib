@@ -57,11 +57,11 @@ class Steganography:
         if output_file_path[-4:] != '.mp3' or wav_file_path[-4:] != '.wav':
             sys.exit("wav_file_path must be wav file, output_file_path must be mp3 file.")
 
-    def encode_wav_to_mp3(self, wav_file_path, output_file_path):
+    def encode_wav_to_mp3(self, wav_file_path, output_file_path, bitrate=320):
         if not self.quiet:
             print(f"\n##################\nStart Encoding {wav_file_path} to  {output_file_path}.")
         self.__check_for_encoder(wav_file_path, output_file_path)
-        self.__encode(wav_file_path, output_file_path, hide=False, quiet=self.quiet)
+        self.__encode(wav_file_path, output_file_path, hide=False, bitrate=bitrate, quiet=self.quiet)
         if not self.quiet:
             print(f"\nFinished Encoding.\n##################")
 
@@ -92,7 +92,7 @@ class Steganography:
         bitrate, d = self.__decode(input_file_path, wav_file_path, reveal=False, quiet=self.quiet)
 
         self.__check_for_encoder(wav_file_path, output_file_path)
-        self.__encode(wav_file_path, output_file_path, hide=True, quiet=self.quiet, massage=message)
+        self.__encode(wav_file_path, output_file_path, hide=True, bitrate=bitrate, quiet=self.quiet, massage=message)
         if delete_wav:
             self.__delete_wav_file(d)
         if not self.quiet:
