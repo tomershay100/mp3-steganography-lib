@@ -57,7 +57,7 @@ class Steganography:
         if output_file_path[-4:] != '.mp3' or wav_file_path[-4:] != '.wav':
             sys.exit("wav_file_path must be wav file, output_file_path must be mp3 file.")
 
-    def encode_wav_to_mp3(self, wav_file_path, output_file_path, bitrate=320):
+    def encode_wav_to_mp3(self, wav_file_path: str, output_file_path: str, bitrate: int = 320):
         if not self.quiet:
             print(f"\n##################\nStart Encoding {wav_file_path} to  {output_file_path}.")
         self.__check_for_encoder(wav_file_path, output_file_path)
@@ -65,27 +65,28 @@ class Steganography:
         if not self.quiet:
             print(f"\nFinished Encoding.\n##################")
 
-    def decode_mp3_to_wav(self, input_file_path, wav_file_path=""):
+    def decode_mp3_to_wav(self, input_file_path: str, wav_file_path: str = ""):
         if not self.quiet:
             print(f"\n##################\nStart Decoding {input_file_path} to  {wav_file_path}.")
         wav_file_path = self.__check_for_decoder(input_file_path, wav_file_path)
-        self.__decode(input_file_path, wav_file_path, reveal=False, quiet=self.quiet)
+        bitrate, _ = self.__decode(input_file_path, wav_file_path, reveal=False, quiet=self.quiet)
         if not self.quiet:
             print(f"\nFinished Decoding.\n##################")
+        return bitrate
 
-    def reveal_massage(self, input_file_path, txt_file_path, delete_wav=True):
+    def reveal_massage(self, input_file_path: str, txt_file_path: str):
         if not self.quiet:
             print(f"\n##################\nStart Revealing hidden message in {input_file_path} to  {txt_file_path}.")
         wav_file_path = self.__check_for_decoder(input_file_path, "")
         if txt_file_path[-4:] != '.txt':
             sys.exit("txt_file_path must be txt file.")
         _, d = self.__decode(input_file_path, wav_file_path, reveal=True, quiet=self.quiet, txt_file_path=txt_file_path)
-        if delete_wav:
-            self.__delete_wav_file(d)
+        self.__delete_wav_file(d)
         if not self.quiet:
             print(f"\nFinished Revealing.\n##################")
 
-    def hide_message(self, input_file_path, output_file_path, message, wav_file_path="", delete_wav=True):
+    def hide_message(self, input_file_path: str, output_file_path: str, message: str, wav_file_path: str = "",
+                     delete_wav: bool = True):
         if not self.quiet:
             print(f"\n##################\nStart Hiding {message} in {output_file_path}.")
         wav_file_path = self.__check_for_decoder(input_file_path, wav_file_path)
@@ -98,15 +99,14 @@ class Steganography:
         if not self.quiet:
             print(f"\nFinished Hiding.\n##################")
 
-    def clear_file(self, input_file_path, output_file_path, wav_file_path="", delete_wav=True):
+    def clear_file(self, input_file_path: str, output_file_path: str):
         if not self.quiet:
             print(f"\n##################\nStart Cleaning {input_file_path} into {output_file_path}.")
-        wav_file_path = self.__check_for_decoder(input_file_path, wav_file_path)
+        wav_file_path = self.__check_for_decoder(input_file_path, "")
         bitrate, d = self.__decode(input_file_path, wav_file_path, reveal=False, quiet=self.quiet)
 
         self.__check_for_encoder(wav_file_path, output_file_path)
         self.__encode(wav_file_path, output_file_path, hide=False, bitrate=bitrate, quiet=self.quiet)
-        if delete_wav:
-            self.__delete_wav_file(d)
+        self.__delete_wav_file(d)
         if not self.quiet:
             print(f"\nFinished Cleaning.\n##################")
