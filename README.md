@@ -10,11 +10,11 @@ This is a steganography library in python for hiding strings in mp3 files.
 
 1. [General](#General)
     - [Background](#background)
-    - [Project Description](https://github.com/tomershay100/Flight-Inspection-App/blob/main/README.md#project-description)
-    - [Project Stucture](https://github.com/tomershay100/Flight-Inspection-App/blob/main/README.md#project-stucture)
-    - [Features](https://github.com/tomershay100/Flight-Inspection-App/blob/main/README.md#features)
+    - [Project Description](https://github.com/tomershay100/mp3-steganography-lib/edit/main/README.md#project-description)
+    - [Project Stucture](https://github.com/tomershay100/mp3-steganography-lib/edit/main/README.md#project-stucture)
 2. [Dependencies](#dependencies)
-3. [Installation](#installation)
+3. [Running Instructions](#running instructions)
+4. [Installation](#installation)
 
 ## General
 
@@ -74,15 +74,15 @@ The library is contains several packages and several classes built as follows:
     * clean ``MP3`` file from any string.
 
 You can see more information about the class hierarchy
-in [UML](https://github.com/tomershay100/Flight-Inspection-App/blob/main/UML%20Diagram.pdf).
+in [UML]().
 
 ## Dependencies
 
-1. [Python 3](https://www.flightgear.org/download/)
-2. [NumPy](https://dotnet.microsoft.com/download/dotnet-framework/net48)
-3. [SciPy](https://www.nuget.org/packages/OxyPlot.Wpf/2.1.0-Preview1)
-4. [TQDM](https://www.nuget.org/packages/CircularGauge)
-5. [bitarray]()
+1. [Python 3.9+](https://www.python.org/downloads/)
+2. [NumPy](https://numpy.org/install/)
+3. [SciPy](https://scipy.org/install/)
+4. [TQDM](https://github.com/tqdm/tqdm)
+5. [bitarray](https://pypi.org/project/bitarray/)
 
 you can also see in `requirements.txt` file
 
