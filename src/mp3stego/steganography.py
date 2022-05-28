@@ -10,6 +10,8 @@ from mp3stego import Encoder
 # TODO add more information prints when quiet is off
 # TODO add more comments
 # TODO change function and variables names
+
+
 class Steganography:
     """
     This class is the Façade of the module. It allows the users a simple way to encode and decode mp3 and wav files,

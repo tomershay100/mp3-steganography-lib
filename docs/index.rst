@@ -8,9 +8,16 @@ Welcome to MP3 Steganography's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Python API:
+   :caption: Steganography API:
 
    source/api/steganography
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Decoder and Encoder:
+
+   source/api/decoder
+   source/api/encoder
 
 Indices and tables
 ==================
