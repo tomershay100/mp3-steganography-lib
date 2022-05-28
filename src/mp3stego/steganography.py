@@ -14,6 +14,9 @@ class Steganography:
     """
     This class is the Façade of the module. It allows the users a simple way to encode and decode mp3 and wav files,
     hide messages in mp3 files, reveal hidden string and clear mp3 files from any string.
+
+    :param quiet: if False, prints information about the processes and the files.
+    :type quiet: bool
     """
 
     def __init__(self, quiet=True):
@@ -65,6 +68,7 @@ class Steganography:
     def encode_wav_to_mp3(self, wav_file_path: str, output_file_path: str, bitrate: int = 320):
         """
         Allow encoding wav file into mp3 file.
+
         :param wav_file_path: the wav file path.
         :type wav_file_path: str
         :param output_file_path: the output mp3 file desired path.
@@ -82,10 +86,12 @@ class Steganography:
     def decode_mp3_to_wav(self, input_file_path: str, wav_file_path: str = "") -> int:
         """
         Allow decoding mp3 file into wav file.
+
         :param input_file_path: the input mp3 file path.
         :type input_file_path: str
         :param wav_file_path: the output wav file desired path.
         :type wav_file_path: str
+
         :return: the bitrate of the mp3 (and wav) file.
         :rtype: int
         """
@@ -100,6 +106,7 @@ class Steganography:
     def reveal_massage(self, input_file_path: str, txt_file_path: str):
         """
         Allow revealing string from mp3 file. The function writes the string into txt file.
+
         :param input_file_path: the input mp3 file path.
         :type input_file_path: str
         :param txt_file_path: the output txt file desired path.
@@ -118,6 +125,7 @@ class Steganography:
     def hide_message(self, input_file_path: str, output_file_path: str, message: str):
         """
         Allow hiding string in mp3 file. The function creates the new mp3 file with the string hidden in it.
+
         :param input_file_path: the input mp3 file path.
         :type input_file_path: str
         :param output_file_path: the output mp3 desired path.
@@ -139,6 +147,7 @@ class Steganography:
     def clear_file(self, input_file_path: str, output_file_path: str):
         """
         Allow clearing mp3 file from hidden string in it. The function creates new mp3 file without the hidden string.
+
         :param input_file_path: the input mp3 file path.
         :type input_file_path: str
         :param output_file_path: the output mp3 desired path.
