@@ -11,3 +11,10 @@ Welcome to MP3 Steganography's documentation!
    :caption: Python API:
 
    source/api/steganography
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
