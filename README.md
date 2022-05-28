@@ -144,5 +144,5 @@ Steganography Class API:
 Install the library using:
 
 ```shell
-pip install -i https://test.pypi.org/simple/ mp3stego-lib==0.2.3
+pip install mp3stego-lib==0.2.5
 ```
