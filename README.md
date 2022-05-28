@@ -10,8 +10,8 @@ This is a steganography library in python for hiding strings in mp3 files.
 
 1. [General](#General)
     - [Background](#background)
-    - [Project Description](https://github.com/tomershay100/mp3-steganography-lib/edit/main/README.md#project-description)
-    - [Project Stucture](https://github.com/tomershay100/mp3-steganography-lib/edit/main/README.md#project-stucture)
+    - [Project Description](#project description)
+    - [Project Structure](#project structure)
 2. [Dependencies](#dependencies)
 3. [Running Instructions](#running instructions)
 4. [Installation](#installation)
@@ -91,10 +91,10 @@ you can also see in `requirements.txt` file
 Steganography Class API:
 
 * Creating Steganography object by
-    ```python
-    from mp3stego import Steganography
-    
-    stego = Steganography(quiet=True)
+    ```python 
+  from mp3stego import Steganography
+  
+  stego = Steganography(quiet=True)
     ```
     * ``quiet: bool``: boolean value for the function to print information or not (default value ``True``).
 * for encoding ``WAV`` file into ``MP3`` file you may use
