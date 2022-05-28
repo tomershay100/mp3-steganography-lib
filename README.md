@@ -1,4 +1,8 @@
 # MP3-Steganography
+[![travis-ci](https://app.travis-ci.com/tomershay100/mp3-steganography-lib.svg?branch=main)](https://app.travis-ci.com/github/tomershay100/mp3-steganography-lib)
+[![doc](https://readthedocs.org/projects/mp3-steganography-lib/badge/?version=latest)](https://mp3-steganography-lib.readthedocs.io/en/latest/)
+[![PyPI version](https://badge.fury.io/py/mp3stego-lib.svg)](https://badge.fury.io/py/mp3stego-lib)
+[![GitHub version](https://badge.fury.io/gh/tomershay100%2Fmp3-steganography-lib.svg)](https://badge.fury.io/gh/tomershay100%2Fmp3-steganography-lib)
 
 #### Contributes
 
