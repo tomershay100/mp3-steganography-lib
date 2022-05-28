@@ -1,37 +1,44 @@
-import setuptools
+from codecs import open
+from os import path
 
-with open("README.md", "r", encoding="utf-8") as fh:
-    long_description = fh.read()
+from setuptools import setup, find_packages
 
-import os
+# The directory containing this file
+HERE = path.abspath(path.dirname(__file__))
 
-the_lib_folder = os.path.dirname(os.path.realpath(__file__))
+# Get the long description from the README file
+with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
+
+the_lib_folder = path.dirname(path.realpath(__file__))
 requirementPath = the_lib_folder + '/requirements.txt'
 install_requires = []
-if os.path.isfile(requirementPath):
+if path.isfile(requirementPath):
     with open(requirementPath) as f:
         install_requires = f.read().splitlines()
 
-setuptools.setup(
+setup(
     name="mp3stego-lib",
-    version="0.2.4",
+    version="0.2.5",
     author="Aviad Seady, Tomer Shay, Lee Zaid",
     author_email="aviadevelops@gmail.com, tomershay100@gmail.com, lizizaid@gmail.com",
-    description="A mp3 decode and encode library",
+    description="mp3 steganography library",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/tomershay100/mp3-steganography-lib",
     project_urls={
         "Bug Tracker": "https://github.com/tomershay100/mp3-steganography-lib/issues",
     },
+    license="MIT",
     classifiers=[
-        "Programming Language :: Python :: 3",
+        "Intended Audience :: Developers",
+        "Programming Language :: Python :: 3.9",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
     package_dir={"": "src"},
     packages=(
-        setuptools.find_packages(where="src")
+        find_packages(where="src")
     ),
     python_requires=">=3.9",
     install_requires=install_requires
