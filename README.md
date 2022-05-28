@@ -14,10 +14,10 @@ This is a steganography library in python for hiding strings in mp3 files.
 
 1. [General](#General)
     - [Background](#background)
-    - [Project Description](#project description)
-    - [Project Structure](#project structure)
+    - [Project Description](#project-description)
+    - [Project Structure](#project-structure)
 2. [Dependencies](#dependencies)
-3. [Running Instructions](#running instructions)
+3. [Running Instructions](#running-instructions)
 4. [Installation](#installation)
 
 ## General
