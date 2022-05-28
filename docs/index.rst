@@ -6,6 +6,9 @@
 Welcome to MP3 Steganography's documentation!
 =============================================
 
+.. automodule:: mp3stego.steganography
+    :members:
+
 .. toctree::
    :maxdepth: 2
    :caption: Steganography API:
