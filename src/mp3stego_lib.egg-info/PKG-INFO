@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: mp3stego-lib
-Version: 0.2.5
+Version: 0.2.7
 Summary: mp3 steganography library
 Home-page: https://github.com/tomershay100/mp3-steganography-lib
 Author: Aviad Seady, Tomer Shay, Lee Zaid
@@ -19,8 +19,8 @@ Description: # MP3-Steganography
         
         1. [General](#General)
             - [Background](#background)
-            - [Project Description](https://github.com/tomershay100/mp3-steganography-lib/edit/main/README.md#project-description)
-            - [Project Stucture](https://github.com/tomershay100/mp3-steganography-lib/edit/main/README.md#project-stucture)
+            - [Project Description](#project description)
+            - [Project Structure](#project structure)
         2. [Dependencies](#dependencies)
         3. [Running Instructions](#running instructions)
         4. [Installation](#installation)
@@ -153,7 +153,7 @@ Description: # MP3-Steganography
         Install the library using:
         
         ```shell
-        pip install -i https://test.pypi.org/simple/ mp3stego-lib==0.2.3
+        pip install mp3stego-lib==0.2.5
         ```
         
 Platform: UNKNOWN
