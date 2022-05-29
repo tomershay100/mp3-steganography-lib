@@ -78,7 +78,7 @@ The library is contains several packages and several classes built as follows:
     * clean ``MP3`` file from any string.
 
 You can see more information about the class hierarchy
-in [UML]().
+in [UML](https://github.com/tomershay100/mp3-steganography-lib/blob/main/src/uml.png).
 
 ## Dependencies
 
@@ -148,5 +148,5 @@ Steganography Class API:
 Install the library using:
 
 ```shell
-pip install mp3stego-lib==0.2.5
+pip install mp3stego-lib
 ```
