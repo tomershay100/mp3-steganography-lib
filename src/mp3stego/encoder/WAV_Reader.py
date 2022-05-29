@@ -1,4 +1,3 @@
-import io
 import struct
 import sys
 from typing import BinaryIO
