@@ -1,5 +1,7 @@
+import io
 import struct
 import sys
+from typing import BinaryIO
 
 import numpy as np
 
@@ -19,7 +21,7 @@ class WavReader:
     def __init__(self, file_path: str, bit_rate: int = 320):
         self.__file_path: str = file_path
         self.__bitrate: int = bit_rate
-        self.__file = open(self.__file_path, 'rb')
+        self.__file: BinaryIO = open(self.__file_path, 'rb')
 
         self.__read_header()
 
