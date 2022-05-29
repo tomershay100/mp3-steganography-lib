@@ -14,26 +14,38 @@ class Encoder:
     :type file_path: str
     :param output_file_path: the mp3 output file path.
     :type output_file_path: str
+    :param bitrate: the bitrate of the input wav file
+    :type bitrate: int
+    :param hide_str: if is not empty, hides the string inside the output mp3 file.
+    :type hide_str: str
     """
 
-    def __init__(self, file_path, output_file_path):
+    def __init__(self, file_path, output_file_path, bitrate: int = 320, hide_str: str = ''):
         self.__file_path = file_path
         self.__output_file_path = output_file_path
-
-    def encode(self, bitrate=320, quiet=True, hide_str=''):
 
         if not os.path.exists(self.__file_path):
             sys.exit('File not found.')
 
-        wav_file = WavReader(self.__file_path, bitrate)
-        encoder = MP3Encoder(wav_file, hide_str=hide_str)
-        if not quiet:
-            encoder.print_info()
-        encoder.encode()
+        self.__wav_file = WavReader(self.__file_path, bitrate)
+        self.__hide_str = hide_str
+        self.__encoder = MP3Encoder(self.__wav_file, hide_str=hide_str)
 
-        encoder.write_mp3_file(self.__output_file_path)
+    def encode(self, quiet: bool = True):
+        """
+        Encoding the input wav file into mp3 file. can also hide string in the file.
+
+        :param quiet: if False, print some information about the decoding process
+        :type quiet: bool
+
+        """
         if not quiet:
-            if encoder.hide_str_offset < len(hide_str) - 1:
+            self.__encoder.print_info()
+        self.__encoder.encode()
+
+        self.__encoder.write_mp3_file(self.__output_file_path)
+        if not quiet:
+            if self.__encoder.hide_str_offset < len(self.__hide_str) - 1:
                 print("File too short for this message length, your message has been trimmed.")
             print(f"MP3 file created on {self.__output_file_path}")
 

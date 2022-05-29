@@ -32,6 +32,17 @@ class ID3FrameFlags(Enum):
 
 
 class ID3Frame:
+    """
+    The id3 frame class, contains all the information of a current id3 frame in mp3 file.
+
+    :param frame_id: current id3 frame id.
+    :type frame_id: list
+    :param flags: some flags from the id3 section.
+    :type flags: int
+    :param content: the id3 content in bytes.
+    :type content: bytes
+    """
+
     def __init__(self, frame_id: list, flags: int, content: bytes):
         self.__frame_id: list = frame_id
         self.__content: bytes = content
@@ -71,10 +82,16 @@ class ID3Frame:
         return flags
 
 
-# ID3 contains meta data irrelevant to the decoder. The header contains an
-# offset used to determine the location of the first MP3 header.
-# | Header | Additional header (optional) | Meta Data | Footer (optional) |
 class ID3:
+    """
+    ID3 contains metadata irrelevant to the decoder. The header contains an offset used to determine the location of
+    the first MP3 header.
+    | Header | Additional header (optional) | Meta Data | Footer (optional) |
+
+    :param buffer: buffet that contains bytes of id3 section in mp3 file
+    :type buffer: list
+    """
+
     def __init__(self, buffer: list):
         # Declarations
         self.__buffer: list = buffer

@@ -27,6 +27,10 @@ class Emphasis(Enum):
 
 
 class FrameHeader:
+    """
+    The frame header class, contains all the information of a current header of a frame in mp3 file.
+    """
+
     def __init__(self):
         # Declarations
         self.__buffer: list = []

@@ -20,14 +20,27 @@ class Offset:
 
 
 def bytes_to_int(byte_list: bytes):
+    """
+    Convert bytes to int.
+
+    :param byte_list: the bytes.
+    :type byte_list: bytes
+
+    :return: the int value
+    :rtype: int
+    """
     return int.from_bytes(byte_list, sys.byteorder)
 
 
-def char_to_int(four_bytes: list):
+def char_to_int(four_bytes: list) -> int:
     """
     Puts four bytes into a single four byte integer type.
-    :param four_bytes:
-    :return:
+
+    :param four_bytes: the bytes
+    :type four_bytes: list
+
+    :return: the int value
+    :rtype int
     """
     num = 0x00
     for i in range(4):
@@ -35,12 +48,24 @@ def char_to_int(four_bytes: list):
     return int(num)
 
 
-def right_shift_char(a: bytes, b: int):
+def right_shift_char(a: bytes, b: int) -> bytes:
+    """
+    Calculate a >> b
+    :param a:
+    :param b:
+    :return:
+    """
     result_int = int.from_bytes(a, byteorder="big") >> b
     return result_int.to_bytes(len(a), byteorder="big")
 
 
-def left_shift_char(a: bytes, b: int):
+def left_shift_char(a: bytes, b: int) -> bytes:
+    """
+    Calculate a << b
+    :param a:
+    :param b:
+    :return:
+    """
     result_int = int.from_bytes(a, byteorder="big") << b
     return result_int.to_bytes(len(a), byteorder="big")
 
@@ -48,9 +73,11 @@ def left_shift_char(a: bytes, b: int):
 def get_bits(buffer: list, start_bit: int, slice_len: int):
     """
     Assumes that end_bit is greater than start_bit and that the result is less than 32 bits, length of an unsigned type.
+
     :param buffer:
     :param start_bit:
     :param slice_len:
+
     :return:
     """
     # exclude the last bit of the slice

@@ -13,6 +13,11 @@ PI = math.pi
 
 
 def init_synth_filterbank_block():
+    """
+    init synth filterbank block
+    :return: synth filterbank block
+    :rtype np.ndarray
+    """
     n = np.zeros((64, 32))
     for i in range(64):
         for j in range(32):
@@ -49,6 +54,10 @@ def create_sine_block():
 
 
 class Frame:
+    """
+    The frame class, contains all the information of a current frame in mp3 file.
+    """
+
     def __init__(self):
         # Declarations
         self.__pcm: np.ndarray = np.array([])
@@ -67,7 +76,17 @@ class Frame:
 
         self.all_huffman_tables = []
 
-    def init_frame_params(self, buffer, file_data, curr_offset):
+    def init_frame_params(self, buffer: list, file_data: list, curr_offset: int):
+        """
+        Init the mp3 frame.
+
+        :param buffer: buffer that contains the bytes of the mp3 frame.
+        :type buffer: list
+        :param file_data: buffer that contains the bytes of the mp3 file.
+        :type file_data: list
+        :param curr_offset: the offset of the file_data to the beginning of the frame.
+        :type curr_offset: int
+        """
         self.__buffer = buffer
         self.set_frame_size()
 
@@ -131,6 +150,7 @@ class Frame:
         """
         Due to the Huffman bits' varying length the main_data isn't aligned with the frames. Unpacks the scaling factors
         and quantized samples.
+
         :param file_data: buffer that contains the mp3 file
         :param curr_offset: the offset from the file_data that points to the first byte of the frame header.
         """
@@ -177,6 +197,7 @@ class Frame:
         """
         Unpack the scale factor indices from the main data. slen1 and slen2 are the size (in bits) of each scaling
         factor. There are 21 scaling factors for long windows and 12 for each short window.
+
         :param gr: the granule
         :param ch: the channel
         :param bit:

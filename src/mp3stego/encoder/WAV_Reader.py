@@ -7,8 +7,16 @@ from mp3stego.encoder import util
 
 
 class WavReader:
-    # The encoder wil get the bitrate from the Decoder
-    def __init__(self, file_path, bit_rate=320):
+    """
+    class for the wav file, contains all the information of a wav file.
+
+    :param file_path: the wav file path
+    :type file_path: str
+    :param bit_rate: the bitrate of the wav file.
+    :type bit_rate: int
+    """
+
+    def __init__(self, file_path: str, bit_rate: int = 320):
         self.__file_path = file_path
         self.__bitrate = bit_rate
         self.__file = open(self.__file_path, 'rb')
@@ -18,8 +26,10 @@ class WavReader:
         self.check_bitrate_index()
         self.check_samplerate_index()
 
-    # Reads the header information to check if it is a valid file with PCM audio samples.
     def __read_header(self):
+        """
+        Reads the header information to check if it is a valid file with PCM audio samples.
+        """
         buffer = self.__file.read(128)
 
         idx = buffer.find(b'RIFF')  # bytes 1 - 4

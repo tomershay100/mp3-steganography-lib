@@ -51,7 +51,13 @@ class MP3Parser:
     def __init_curr_frame(self):
         self.__curr_frame.init_frame_params(self.__buffer, self.__file_data, self.__offset)
 
-    def parse_file(self):
+    def parse_file(self) -> int:
+        """
+        decoding the mp3 file, frame by frame and saves the final pcm data.
+
+        :return: the number of parsed frames
+        :rtype: int
+        """
         pcm_data = []
         num_of_parsed_frames = 0
 
@@ -76,8 +82,14 @@ class MP3Parser:
         return num_of_parsed_frames
 
     def write_to_wav(self):
-        # Convert PCM to WAV (from 32-bit floating-point to 16-bit PCM by mult by 32767)
+        """
+        Convert PCM to WAV (from 32-bit floating-point to 16-bit PCM by mult by 32767)
+        """
         write(self.__wav_file_path, self.__curr_frame.sampling_rate, (self.__pcm_data * 32767).astype(np.int16))
 
-    def get_bitrate(self):
+    def get_bitrate(self) -> int:
+        """
+        :return: the bitrate of the mp3 file (and the output wav file)
+        :rtype: int
+        """
         return self.__curr_frame.get_bitrate()

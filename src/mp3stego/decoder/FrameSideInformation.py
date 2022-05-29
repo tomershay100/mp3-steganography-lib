@@ -4,8 +4,13 @@ from mp3stego.decoder.FrameHeader import *
 from mp3stego.decoder.util import *
 
 
-# Side information contains info relevant to decode main data.
+#
 class FrameSideInformation:
+    """
+    The frame side information class, contains all the information of teh side information of a frame in mp3 file.
+    Side information contains info relevant to decode main data.
+    """
+
     def __init__(self):
         self.__main_data_begin: int = 0
         self.__scfsi: np.ndarray = np.zeros((2, 4))
@@ -37,6 +42,7 @@ class FrameSideInformation:
     def set_side_info(self, buffer: list, header: FrameHeader):
         """
         The side information contains information on how to decode the main_data.
+
         :param buffer: buffer that contains the mp3 file, from the first byte of the side info.
         :param header: The frame header
         """

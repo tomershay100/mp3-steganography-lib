@@ -338,9 +338,11 @@ class MP3Encoder:
 
     :param wav_file: a WavReader that contains the wav file data.
     :type wav_file: WavReader
+    :param hide_str: if is not empty, hides the string inside the output mp3 file.
+    :type hide_str: str
     """
 
-    def __init__(self, wav_file: WavReader, hide_str=""):
+    def __init__(self, wav_file: WavReader, hide_str: str = ""):
         self.__wav_file = wav_file
         # Compute default encoding values.
         self.__ratio = np.zeros((util.MAX_GRANULES, util.MAX_CHANNELS, 21), dtype=np.double)
@@ -466,6 +468,10 @@ class MP3Encoder:
         print(f"Encoding \"{self.__wav_file.file_path}\" to \"{self.__wav_file.file_path[:-3]}mp3\"\n")
 
     def encode(self):
+        """
+        Encoding the wav file into mp3 file, frame by frame and saves the output bytes of the mp3 file.
+        Also, writes the mp3 file.
+        """
         samples_per_pass = self.__samples_per_pass() * self.__wav_file.num_of_channels
 
         # All the magic happens here
@@ -1165,6 +1171,9 @@ class MP3Encoder:
         self.__encode_main_data()
 
     def __encode_side_info(self):
+        """
+        encode the side information
+        """
         self.__putbits(0x7ff, 11)
         self.__putbits(self.__mpeg.version, 2)
         self.__putbits(self.__mpeg.layer, 2)
@@ -1220,6 +1229,9 @@ class MP3Encoder:
                     self.__putbits(self.__side_info.gr[gr].ch[ch].tt.count1table_select, 1)
 
     def __encode_main_data(self):
+        """
+        Encode the main data.
+        """
         for gr in range(self.__mpeg.granules_per_frame):
             for ch in range(self.__wav_file.num_of_channels):
                 slen1 = tables.slen1_tab[self.__side_info.gr[gr].ch[ch].tt.scalefac_compress]
@@ -1410,7 +1422,12 @@ class MP3Encoder:
         self.__bitstream.data_position = 0
         return written, self.__bitstream.data
 
-    def write_mp3_file(self, output_file):
+    def write_mp3_file(self, output_file: str):
+        """
+        Writes the out_buffer from the encode process into the output mp3 file.
+        :param output_file: the output mp3 file.
+        :type output_file: str
+        """
         f = open(output_file, "wb")
         f.write(bytes(self.__out_buffer))
         f.close()
