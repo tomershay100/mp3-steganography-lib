@@ -34,13 +34,13 @@ class MP3Parser:
             self.__valid = True
             self.__file_data = file_data
             self.__file_length = len(file_data)
-            self.__offset = offset
+            self.__offset: int = offset
             self.__init_curr_header()
             self.__curr_frame.set_frame_size()
         else:
             self.__valid = False
 
-        self.output_bits = ""
+        self.output_bits: str = ""
 
     def __init_curr_header(self):
         if self.__buffer[0] == 0xFF and self.__buffer[1] >= 0xE0:

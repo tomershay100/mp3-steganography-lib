@@ -343,20 +343,21 @@ class MP3Encoder:
     """
 
     def __init__(self, wav_file: WavReader, hide_str: str = ""):
-        self.__wav_file = wav_file
+        self.__wav_file: WavReader = wav_file
         # Compute default encoding values.
-        self.__ratio = np.zeros((util.MAX_GRANULES, util.MAX_CHANNELS, 21), dtype=np.double)
-        self.__scalefactor = ScaleFactor()
-        self.__pe = np.zeros((util.MAX_CHANNELS, util.MAX_GRANULES), dtype=np.double)
-        self.__l3_enc = np.zeros((util.MAX_CHANNELS, util.MAX_GRANULES, util.GRANULE_SIZE), dtype=np.int32)
-        self.__l3_sb_sample = np.zeros((util.MAX_CHANNELS, util.MAX_GRANULES + 1, 18, util.SBLIMIT),
-                                       dtype=np.int32)
-        self.__mdct_freq = np.zeros((util.MAX_CHANNELS, util.MAX_GRANULES, util.GRANULE_SIZE), dtype=np.int32)
-        self.__l3loop = L3Loop()
-        self.__mdct = MDCT()
-        self.__subband = Subband()
-        self.__side_info = SideInfo()
-        self.__mpeg = MPEG()
+        self.__ratio: np.ndarray = np.zeros((util.MAX_GRANULES, util.MAX_CHANNELS, 21), dtype=np.double)
+        self.__scalefactor: ScaleFactor = ScaleFactor()
+        self.__pe: np.ndarray = np.zeros((util.MAX_CHANNELS, util.MAX_GRANULES), dtype=np.double)
+        self.__l3_enc: np.ndarray = np.zeros((util.MAX_CHANNELS, util.MAX_GRANULES, util.GRANULE_SIZE), dtype=np.int32)
+        self.__l3_sb_sample: np.ndarray = np.zeros((util.MAX_CHANNELS, util.MAX_GRANULES + 1, 18, util.SBLIMIT),
+                                                   dtype=np.int32)
+        self.__mdct_freq: np.ndarray = np.zeros((util.MAX_CHANNELS, util.MAX_GRANULES, util.GRANULE_SIZE),
+                                                dtype=np.int32)
+        self.__l3loop: L3Loop = L3Loop()
+        self.__mdct: MDCT = MDCT()
+        self.__subband: Subband = Subband()
+        self.__side_info: SideInfo = SideInfo()
+        self.__mpeg: MPEG = MPEG()
 
         self.__subband_initialise()
         self.__mdct_initialise()

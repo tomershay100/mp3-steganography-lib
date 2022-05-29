@@ -17,24 +17,22 @@ class Decoder:
     """
 
     def __init__(self, file_path: str, output_file_path: str):
-        self.__parser: MP3Parser
-
-        self.__file_path = file_path
-        self.__output_file_path = output_file_path
+        self.__file_path: str = file_path
+        self.__output_file_path: str = output_file_path
 
         if not os.path.exists(self.__file_path):
             sys.exit('File not found.')
 
         with open(self.__file_path, 'rb') as f:
-            self.__hex_data = [c for c in f.read()]
+            self.__hex_data: list = [c for c in f.read()]
 
-        self.__id3_decoder = ID3(self.__hex_data)
+        self.__id3_decoder: ID3 = ID3(self.__hex_data)
         if self.__id3_decoder.is_valid:
             offset = self.__id3_decoder.offset
         else:
             offset = 0
 
-        self.__parser = MP3Parser(self.__hex_data, offset, self.__output_file_path)
+        self.__parser: MP3Parser = MP3Parser(self.__hex_data, offset, self.__output_file_path)
 
     def __parse_metadata(self, id3_parser: ID3):
         with open('METADATA.txt', 'w') as metadata:

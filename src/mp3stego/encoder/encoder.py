@@ -20,16 +20,16 @@ class Encoder:
     :type hide_str: str
     """
 
-    def __init__(self, file_path, output_file_path, bitrate: int = 320, hide_str: str = ''):
-        self.__file_path = file_path
-        self.__output_file_path = output_file_path
+    def __init__(self, file_path: str, output_file_path: str, bitrate: int = 320, hide_str: str = ''):
+        self.__file_path: str = file_path
+        self.__output_file_path: str = output_file_path
 
         if not os.path.exists(self.__file_path):
             sys.exit('File not found.')
 
-        self.__wav_file = WavReader(self.__file_path, bitrate)
-        self.__hide_str = hide_str
-        self.__encoder = MP3Encoder(self.__wav_file, hide_str=hide_str)
+        self.__wav_file: WavReader = WavReader(self.__file_path, bitrate)
+        self.__hide_str: str = hide_str
+        self.__encoder: MP3Encoder = MP3Encoder(self.__wav_file, hide_str=hide_str)
 
     def encode(self, quiet: bool = True):
         """

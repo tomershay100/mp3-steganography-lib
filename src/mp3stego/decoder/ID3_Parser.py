@@ -106,14 +106,14 @@ class ID3:
         if chr(buffer[0]) == 'I' and chr(buffer[1]) == 'D' and chr(buffer[2]) == '3':
             self.__set_version(self.__buffer[3], self.__buffer[4])
             if self.__set_flags(self.__buffer[5]):
-                self.__valid = True
+                self.__valid: bool = True
                 self.__set_offset(util.char_to_int(self.__buffer[6:10]))
                 self.__set_extended_header_size(util.char_to_int(self.__buffer[10:14]))
                 self.__set_frames(10 + self.__extended_header_size)
             else:
-                self.__valid = False
+                self.__valid: bool = False
         else:
-            self.__valid = False
+            self.__valid: bool = False
 
     def __set_version(self, version: int, revision: int):
         self.__version = f'{MPEG_VERSION}.{version}.{revision}'
