@@ -135,7 +135,7 @@ class ScaleFactor:
 
 @dataclass
 class L3Loop:
-    xr: np.array  # a pointer of the magnitudes of the spectral values
+    xr: np.ndarray  # a pointer of the magnitudes of the spectral values
     xrsq: []  # xr squared
     xrabs: []  # xr absolute
     xrmax: int  # maximum of xrabs array
@@ -370,8 +370,8 @@ class MP3Encoder:
         self.__mpeg.original = wav_file.original
 
         #  Set default values.
-        self.__resv_max = 0
-        self.__resv_size = 0
+        self.__resv_max: int = 0
+        self.__resv_size: int = 0
         self.__mpeg.layer = 1  # Only Layer III currently implemented.
         self.__mpeg.crc = 0
         self.__mpeg.ext = 0
@@ -395,18 +395,18 @@ class MP3Encoder:
         if self.__mpeg.frac_slots_per_frame == 0:
             self.__mpeg.padding = 0
 
-        self.__bitstream = BitstreamStruct(util.BUFFER_SIZE, 0, 0, 32)
+        self.__bitstream: BitstreamStruct = BitstreamStruct(util.BUFFER_SIZE, 0, 0, 32)
 
         # determine the mean bitrate for main data
         if self.__mpeg.granules_per_frame == 2:  # MPEG 1
-            self.__side_info_len = 8 * ((4 + 17) if wav_file.num_of_channels == 1 else (4 + 32))
+            self.__side_info_len: int = 8 * ((4 + 17) if wav_file.num_of_channels == 1 else (4 + 32))
         else:  # MPEG 2
-            self.__side_info_len = 8 * ((4 + 9) if wav_file.num_of_channels == 1 else (4 + 17))
+            self.__side_info_len: int = 8 * ((4 + 9) if wav_file.num_of_channels == 1 else (4 + 17))
 
-        self.__out_buffer = bytearray('', "utf-8")
+        self.__out_buffer: bytearray = bytearray('', "utf-8")
 
-        self.__hide_str = hide_str
-        self.__hide_str_offset = 0
+        self.__hide_str: str = hide_str
+        self.__hide_str_offset: int = 0
 
     def __subband_initialise(self):
         for i in range(util.MAX_CHANNELS - 1, -1, -1):

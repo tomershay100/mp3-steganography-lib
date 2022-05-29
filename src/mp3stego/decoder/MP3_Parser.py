@@ -11,11 +11,14 @@ class MP3Parser:
     Class for parsing mp3 files into wav file.
 
     :param file_data: buffer for the file hexadecimal data.
+    :type file_data: list
     :param offset: offset for the file to begin after the id3.
+    :type offset: int
     :param wav_file_path: the output .wav file path
+    :type wav_file_path: str
     """
 
-    def __init__(self, file_data, offset, wav_file_path):
+    def __init__(self, file_data: list, offset: int, wav_file_path: str):
         # Declarations
         self.__curr_frame: Frame = Frame()
         self.__valid: bool = False
@@ -25,20 +28,20 @@ class MP3Parser:
         self.__pcm_data: np.array = np.array([])
         self.__file_length: int = 0
         # self.__file_path = file_path
-        self.__wav_file_path = wav_file_path
+        self.__wav_file_path: str = wav_file_path
 
         # cut the id3 from hex_data
-        self.__buffer = file_data[offset:]
+        self.__buffer: list = file_data[offset:]
 
         if self.__buffer[0] == 0xFF and self.__buffer[1] >= 0xE0:
-            self.__valid = True
-            self.__file_data = file_data
-            self.__file_length = len(file_data)
+            self.__valid: bool = True
+            self.__file_data: list = file_data
+            self.__file_length: int = len(file_data)
             self.__offset: int = offset
             self.__init_curr_header()
             self.__curr_frame.set_frame_size()
         else:
-            self.__valid = False
+            self.__valid: bool = False
 
         self.output_bits: str = ""
 

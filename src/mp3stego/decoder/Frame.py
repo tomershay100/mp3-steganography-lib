@@ -27,6 +27,10 @@ def init_synth_filterbank_block():
 
 
 def create_sine_block():
+    """
+    :return:
+    :rtype: np.ndarray
+    """
     sine_block = np.zeros((4, 36))
 
     for i in range(36):
@@ -71,10 +75,10 @@ class Frame:
 
         self.__main_data: list = []
         self.__samples: np.ndarray = np.zeros((2, 2, NUM_OF_SAMPLES))
-        self.__sine_block = create_sine_block()
-        self.__synth_filterbank_block = init_synth_filterbank_block()
+        self.__sine_block: np.ndarray = create_sine_block()
+        self.__synth_filterbank_block: np.ndarray = init_synth_filterbank_block()
 
-        self.all_huffman_tables = []
+        self.all_huffman_tables: list = []
 
     def init_frame_params(self, buffer: list, file_data: list, curr_offset: int):
         """
