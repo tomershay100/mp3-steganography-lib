@@ -19,7 +19,7 @@ if path.isfile(requirementPath):
 
 setup(
     name="mp3stego-lib",
-    version="1.0.0",
+    version="1.0.1",
     author="Aviad Seady, Tomer Shay, Lee Zaid",
     author_email="aviadevelops@gmail.com, tomershay100@gmail.com, lizizaid@gmail.com",
     description="mp3 steganography library",
