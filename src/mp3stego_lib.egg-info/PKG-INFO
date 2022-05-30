@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: mp3stego-lib
-Version: 1.0.0
+Version: 1.0.1
 Summary: mp3 steganography library
 Home-page: https://github.com/tomershay100/mp3-steganography-lib
 Author: Aviad Seady, Tomer Shay, Lee Zaid
@@ -31,10 +31,10 @@ This is a steganography library in python for hiding strings in mp3 files.
 
 1. [General](#General)
     - [Background](#background)
-    - [Project Description](#project description)
-    - [Project Structure](#project structure)
+    - [Project Description](#project-description)
+    - [Project Structure](#project-structure)
 2. [Dependencies](#dependencies)
-3. [Running Instructions](#running instructions)
+3. [Running Instructions](#running-instructions)
 4. [Installation](#installation)
 
 ## General
@@ -95,7 +95,7 @@ The library is contains several packages and several classes built as follows:
     * clean ``MP3`` file from any string.
 
 You can see more information about the class hierarchy
-in [UML]().
+in [UML](https://github.com/tomershay100/mp3-steganography-lib/blob/main/src/uml.png).
 
 ## Dependencies
 
@@ -165,5 +165,5 @@ Steganography Class API:
 Install the library using:
 
 ```shell
-pip install mp3stego-lib==0.2.5
+pip install mp3stego-lib
 ```

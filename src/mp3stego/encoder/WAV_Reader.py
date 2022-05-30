@@ -107,6 +107,7 @@ class WavReader:
 
         self.__buffer = np.fromfile(self.__file, 'int16', self.__num_of_samples * self.__num_of_ch * 2)
         self.__buffer_pos = {0: 0, 1: 1}
+        self.__file.close()
 
     def check_bitrate_index(self):
         if util.find_bitrate_index(self.__bitrate, self.__mpeg_version) < 0:
