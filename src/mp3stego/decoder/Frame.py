@@ -377,25 +377,25 @@ class Frame:
         if self.__side_info.block_type[gr][ch] == 2 and self.__side_info.window_switching[gr][ch]:
             if self.__side_info.mixed_block_flag[gr][ch] == 1:  # Mixed blocks.
                 for sfb in range(8):
-                    self.__side_info.scalefac_l[gr][ch][sfb] = util.get_bits(self.__main_data, bit,
+                    self.__side_info.scalefac_l[gr][ch][sfb] = util.get_bits(np.array(self.__main_data), bit,
                                                                              scalefactor_length[0])
                     bit += scalefactor_length[0]
 
                 for sfb in range(3, 6):
                     for window in range(3):
-                        self.__side_info.scalefac_s[gr][ch][window][sfb] = util.get_bits(self.__main_data, bit,
-                                                                                         scalefactor_length[0])
+                        self.__side_info.scalefac_s[gr][ch][window][sfb] = util.get_bits(np.array(self.__main_data),
+                                                                                         bit, scalefactor_length[0])
                         bit += scalefactor_length[0]
             else:  # Short blocks.
                 for sfb in range(6):
                     for window in range(3):
-                        self.__side_info.scalefac_s[gr][ch][window][sfb] = util.get_bits(self.__main_data, bit,
-                                                                                         scalefactor_length[0])
+                        self.__side_info.scalefac_s[gr][ch][window][sfb] = util.get_bits(np.array(self.__main_data),
+                                                                                         bit, scalefactor_length[0])
                         bit += scalefactor_length[0]
 
             for sfb in range(6, 12):
                 for window in range(3):
-                    self.__side_info.scalefac_s[gr][ch][window][sfb] = util.get_bits(self.__main_data, bit,
+                    self.__side_info.scalefac_s[gr][ch][window][sfb] = util.get_bits(np.array(self.__main_data), bit,
                                                                                      scalefactor_length[1])
                     bit += scalefactor_length[1]
 
@@ -406,11 +406,11 @@ class Frame:
         else:
             if gr == 0:
                 for sfb in range(11):
-                    self.__side_info.scalefac_l[gr][ch][sfb] = util.get_bits(self.__main_data, bit,
+                    self.__side_info.scalefac_l[gr][ch][sfb] = util.get_bits(np.array(self.__main_data), bit,
                                                                              scalefactor_length[0])
                     bit += scalefactor_length[0]
                 for sfb in range(11, 21):
-                    self.__side_info.scalefac_l[gr][ch][sfb] = util.get_bits(self.__main_data, bit,
+                    self.__side_info.scalefac_l[gr][ch][sfb] = util.get_bits(np.array(self.__main_data), bit,
                                                                              scalefactor_length[1])
                     bit += scalefactor_length[1]
             else:  # Scale factors might be reused in the second granule.
@@ -421,7 +421,7 @@ class Frame:
                         if self.__side_info.scfsi[ch][i]:
                             self.__side_info.scalefac_l[gr][ch][sfb] = self.__side_info.scalefac_l[0][ch][sfb]
                         else:
-                            self.__side_info.scalefac_l[gr][ch][sfb] = util.get_bits(self.__main_data, bit,
+                            self.__side_info.scalefac_l[gr][ch][sfb] = util.get_bits(np.array(self.__main_data), bit,
                                                                                      scalefactor_length[0])
                             bit += scalefactor_length[0]
                 for i in range(2, 4):
@@ -429,7 +429,7 @@ class Frame:
                         if self.__side_info.scfsi[ch][i]:
                             self.__side_info.scalefac_l[gr][ch][sfb] = self.__side_info.scalefac_l[0][ch][sfb]
                         else:
-                            self.__side_info.scalefac_l[gr][ch][sfb] = util.get_bits(self.__main_data, bit,
+                            self.__side_info.scalefac_l[gr][ch][sfb] = util.get_bits(np.array(self.__main_data), bit,
                                                                                      scalefactor_length[1])
                             bit += scalefactor_length[1]
 
@@ -480,7 +480,7 @@ class Frame:
 
             repeat = True
             # The main_data is buffer that containing the main data excluding the frame header and side info.
-            bit_sample = util.get_bits(self.__main_data, bit, 32)
+            bit_sample = util.get_bits(np.array(self.__main_data), bit, 32)
 
             # Cycle through the Huffman table and find a matching bit pattern.
             row = 0
@@ -497,13 +497,13 @@ class Frame:
                             # linbits extend the sample's size if needed.
                             linbit = 0
                             if big_value_linbit[table_num] != 0 and values[i] == big_value_max[table_num] - 1:
-                                linbit = util.get_bits(self.__main_data, bit, big_value_linbit[table_num])
+                                linbit = util.get_bits(np.array(self.__main_data), bit, big_value_linbit[table_num])
                                 bit += big_value_linbit[table_num]
 
                             # If the sample is negative or positive.
                             sign = 1
                             if values[i] > 0:
-                                sign = -1 if util.get_bits(self.__main_data, bit, 1) > 0 else 1
+                                sign = -1 if util.get_bits(np.array(self.__main_data), bit, 1) > 0 else 1
                                 bit += 1
 
                             self.__samples[gr][ch][sample + i] = float(sign * (values[i] + linbit))
@@ -519,14 +519,14 @@ class Frame:
 
             # Flip bits.
             if self.side_info.count1table_select[gr][ch] == 1:
-                bit_sample = util.get_bits(self.__main_data, bit, 4)
+                bit_sample = util.get_bits(np.array(self.__main_data), bit, 4)
                 bit += 4
                 values[0] = 0 if (bit_sample & 0x08) > 0 else 1
                 values[1] = 0 if (bit_sample & 0x04) > 0 else 1
                 values[2] = 0 if (bit_sample & 0x02) > 0 else 1
                 values[3] = 0 if (bit_sample & 0x01) > 0 else 1
             else:
-                bit_sample = util.get_bits(self.__main_data, bit, 32)
+                bit_sample = util.get_bits(np.array(self.__main_data), bit, 32)
                 for entry in range(16):
                     value = quad_table_1.hcod[entry]
                     size = quad_table_1.hlen[entry]
@@ -540,7 +540,7 @@ class Frame:
             # Get the sign bit.
             for i in range(4):
                 if values[i] > 0:
-                    if util.get_bits(self.__main_data, bit, 1) == 1:
+                    if util.get_bits(np.array(self.__main_data), bit, 1) == 1:
                         values[i] = -values[i]
                     bit += 1
 

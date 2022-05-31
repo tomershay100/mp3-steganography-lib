@@ -42,7 +42,7 @@ def get_bits(buffer: np.ndarray, start_bit: int, slice_len: int):
     buff_len = len(buffer)
     if end_byte >= buff_len:
         # pad with zeros
-        buff_copy.extend([0 for _ in range(end_byte - buff_len + 1)])
+        buff_copy = np.append(buff_copy, np.array([0 for _ in range(end_byte - buff_len + 1)]))
 
     bits = []
     for idx in range(start_byte, end_byte + 1):
