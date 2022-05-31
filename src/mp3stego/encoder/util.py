@@ -1,4 +1,5 @@
 import numpy as np
+from numba import njit
 
 MAX_CHANNELS = 2
 MAX_GRANULES = 2
@@ -119,18 +120,21 @@ def find_mpeg_version(samplerate_index):
         return MPEG_VERSIONS["MPEG_25"]
 
 
+@njit(fastmath=True)
 def mulsr(a, b):
     a = np.int64(a)
     b = np.int64(b)
     return np.int32((np.right_shift(((a * b) + np.int64(1073741824)), 31)))
 
 
+@njit(fastmath=True)
 def mulr(a, b):
     a = np.int64(a)
     b = np.int64(b)
     return np.int32((np.right_shift((a * b) + np.int64(2147483648), 32)))
 
 
+@njit(fastmath=True)
 def mul(a, b):
     a = np.int64(a)
     b = np.int64(b)
@@ -138,6 +142,7 @@ def mul(a, b):
     return np.int32(tmp)
 
 
+@njit(fastmath=True)
 def cmuls(are, aim, bre, bim):
     are = np.int64(are)
     aim = np.int64(aim)
@@ -150,6 +155,7 @@ def cmuls(are, aim, bre, bim):
     return dre, dim
 
 
+@njit(fastmath=True)
 def labs(a):
     return np.abs(np.long(a))
 
@@ -158,6 +164,7 @@ def get_bits_count(bitstream):
     return bitstream.data_position * 8 + 32 - bitstream.cache_bits
 
 
+@njit(fastmath=True)
 def abs_and_sign(x):
     if x > 0:
         return x, 0

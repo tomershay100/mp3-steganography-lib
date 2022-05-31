@@ -1,35 +1,8 @@
-import sys
-from dataclasses import dataclass
+import numpy as np
 
 BYTE_LENGTH = 8
 
 H0 = {3, 6, 8, 11, 12, 15, 17, 19, 21, 23, 24, 26, 28, 30}
-
-
-@dataclass
-class Offset:
-    def __init__(self):
-        self.__offset: int = 0
-
-    @property
-    def offset(self):
-        return self.__offset
-
-    def add_to_offset(self, n):
-        self.__offset += n
-
-
-def bytes_to_int(byte_list: bytes):
-    """
-    Convert bytes to int.
-
-    :param byte_list: the bytes.
-    :type byte_list: bytes
-
-    :return: the int value
-    :rtype: int
-    """
-    return int.from_bytes(byte_list, sys.byteorder)
 
 
 def char_to_int(four_bytes: list) -> int:
@@ -48,29 +21,7 @@ def char_to_int(four_bytes: list) -> int:
     return int(num)
 
 
-def right_shift_char(a: bytes, b: int) -> bytes:
-    """
-    Calculate a >> b
-    :param a:
-    :param b:
-    :return:
-    """
-    result_int = int.from_bytes(a, byteorder="big") >> b
-    return result_int.to_bytes(len(a), byteorder="big")
-
-
-def left_shift_char(a: bytes, b: int) -> bytes:
-    """
-    Calculate a << b
-    :param a:
-    :param b:
-    :return:
-    """
-    result_int = int.from_bytes(a, byteorder="big") << b
-    return result_int.to_bytes(len(a), byteorder="big")
-
-
-def get_bits(buffer: list, start_bit: int, slice_len: int):
+def get_bits(buffer: np.ndarray, start_bit: int, slice_len: int):
     """
     Assumes that end_bit is greater than start_bit and that the result is less than 32 bits, length of an unsigned type.
 

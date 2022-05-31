@@ -1,4 +1,5 @@
 import numpy as np
+from numba import njit
 
 from mp3stego.decoder import tables
 from mp3stego.decoder import util
@@ -12,6 +13,7 @@ SQRT2 = math.sqrt(2)
 PI = math.pi
 
 
+@njit
 def init_synth_filterbank_block():
     """
     init synth filterbank block
@@ -26,6 +28,7 @@ def init_synth_filterbank_block():
     return n
 
 
+@njit
 def create_sine_block():
     """
     :return:
@@ -55,6 +58,161 @@ def create_sine_block():
         sine_block[3][i] = math.sin(math.pi / 36.0 * (i + 0.5))
 
     return sine_block
+
+
+@njit
+def synth_filterbank(gr: int, ch: int, samples, fifo, synth_filterbank_block):
+    """
+    :param synth_filterbank_block:
+    :param fifo:
+    :param samples:
+    :param gr: the granule
+    :param ch: the channel
+    """
+    s, u, w = np.zeros(32), np.zeros(512), np.zeros(512)
+    pcm = np.zeros(576)
+
+    for sb in range(18):
+        for i in range(32):
+            s[i] = samples[gr][ch][i * 18 + sb]
+
+        for i in range(1023, 63, -1):
+            fifo[ch][i] = fifo[ch][i - 64]
+
+        for i in range(64):
+            fifo[ch][i] = 0.0
+            for j in range(32):
+                fifo[ch][i] += s[j] * synth_filterbank_block[i][j]
+
+        for i in range(8):
+            for j in range(32):
+                u[i * 64 + j] = fifo[ch][i * 128 + j]
+                u[i * 64 + j + 32] = fifo[ch][i * 128 + j + 96]
+
+        for i in range(512):
+            w[i] = u[i] * synth_window[i]
+
+        for i in range(32):
+            sum = 0
+            for j in range(16):
+                sum += w[j * 32 + i]
+            pcm[32 * sb + i] = sum
+
+    samples[gr][ch] = pcm
+
+
+@njit
+def imdct(gr: int, ch: int, block_type, samples, sine_block, prev_samples):
+    """
+    Inverted modified discrete cosine transformations (IMDCT) are applied to each sample and are afterwards windowed
+    to fit their window shape. As an addition, the samples are overlapped.
+    :param prev_samples:
+    :param sine_block:
+    :param samples:
+    :param block_type:
+    :param gr: the granule
+    :param ch: the channel
+    """
+    sample_block = np.zeros(36)
+    n = 12 if block_type[gr][ch] == 2 else 36
+    half_n = int(n / 2)
+    sample = 0
+
+    for block in range(32):
+        for win in range(3 if block_type[gr][ch] == 2 else 1):
+            for i in range(n):
+                xi = 0.0
+                for k in range(half_n):
+                    s = samples[gr][ch][18 * block + half_n * win + k]
+                    xi += s * math.cos(math.pi / (2 * n) * (2 * i + 1 + half_n) * (2 * k + 1))
+
+                # Windowing samples.
+                sample_block[win * n + i] = xi * sine_block[int(block_type[gr][ch])][i]
+
+        if block_type[gr][ch] == 2:
+            temp_block = np.copy(sample_block)
+            for i in range(6):
+                sample_block[i] = 0
+            for i in range(6, 12):
+                sample_block[i] = temp_block[0 + i - 6]
+            for i in range(12, 18):
+                sample_block[i] = temp_block[0 + i - 6] + temp_block[12 + i - 12]
+            for i in range(18, 24):
+                sample_block[i] = temp_block[12 + i - 12] + temp_block[24 + i - 18]
+            for i in range(24, 30):
+                sample_block[i] = temp_block[24 + i - 18]
+            for i in range(30, 36):
+                sample_block[i] = 0
+
+        # Overlap.
+        for i in range(18):
+            samples[gr][ch][sample + i] = sample_block[i] + prev_samples[ch][block][i]
+            prev_samples[ch][block][i] = sample_block[18 + i]
+        sample += 18
+
+
+@njit
+def requantize(gr: int, ch: int, scalefac_scale, block_type, mixed_block_flag,
+               short_win, global_gain, scalefac_s, long_win, scalefac_l, preflag,
+               samples, subblock_gain):
+    """
+    The reduced samples are rescaled to their original scales and precisions.
+    :param subblock_gain:
+    :param samples:
+    :param preflag:
+    :param scalefac_l:
+    :param long_win:
+    :param scalefac_s:
+    :param global_gain:
+    :param short_win:
+    :param mixed_block_flag:
+    :param block_type:
+    :param scalefac_scale:
+    :param gr: the granule
+    :param ch: the channel
+    """
+    exp1: float
+    exp2: float
+    window = 0
+    sfb = 0
+    SCALEFAC_MULT = 0.5 if scalefac_scale[gr][ch] == 0 else 1
+
+    sample = 0
+    i = 0
+    while sample < NUM_OF_SAMPLES:
+        if block_type[gr][ch] == 2 or (mixed_block_flag[gr][ch] and sfb >= 8):
+            short_win_val = short_win[sfb] if sfb < len(short_win) else 0
+            if i == short_win_val:
+                i = 0
+                if window == 2:
+                    window = 0
+                    sfb += 1
+                else:
+                    window += 1
+
+            exp1 = global_gain[gr][ch] - 210.0 - 8.0 * subblock_gain[gr][ch][
+                window]
+            exp2 = SCALEFAC_MULT * scalefac_s[gr][ch][window][sfb]
+        else:
+            if sample == long_win[sfb + 1]:
+                # Don't increment sfb at the zeroth sample.
+                sfb += 1
+
+            exp1 = global_gain[gr][ch] - 210.0
+
+            pretab_val = tables.pretab[sfb] if sfb < len(tables.pretab) else 0
+            exp2 = SCALEFAC_MULT * (
+                    scalefac_l[gr][ch][sfb] + preflag[gr][ch] * pretab_val)
+
+        sign = -1.0 if samples[gr][ch][sample] < 0 else 1.0
+        a = pow(abs(samples[gr][ch][sample]), 4.0 / 3.0)
+        b = pow(2.0, exp1 / 4.0)
+        c = pow(2.0, -exp2)
+
+        samples[gr][ch][sample] = sign * a * b * c
+
+        sample += 1
+        i += 1
 
 
 class Frame:
@@ -103,7 +261,11 @@ class Frame:
 
         for gr in range(2):
             for ch in range(self.__header.channels):
-                self.__requantize(gr, ch)
+                requantize(gr, ch, self.side_info.scalefac_scale, self.side_info.block_type,
+                           self.side_info.mixed_block_flag, self.__header.band_width.short_win,
+                           self.side_info.global_gain, self.side_info.scalefac_s,
+                           self.__header.band_index.long_win, self.side_info.scalefac_l, self.side_info.preflag,
+                           self.__samples, self.__side_info.subblock_gain)
 
             if self.__header.channel_mode == ChannelMode.JointStereo and self.__header.mode_extension[0]:
                 self.__ms_stereo(gr)
@@ -114,9 +276,9 @@ class Frame:
                 else:
                     self.__alias_reduction(gr, ch)
 
-                self.__imdct(gr, ch)
+                imdct(gr, ch, self.side_info.block_type, self.__samples, self.__sine_block, self.__prev_samples)
                 self.__frequency_inversion(gr, ch)
-                self.__synth_filterbank(gr, ch)
+                synth_filterbank(gr, ch, self.__samples, self.__fifo, self.__synth_filterbank_block)
 
         self.__interleave()
 
@@ -392,56 +554,6 @@ class Frame:
             self.__samples[gr][ch][sample] = 0
             sample += 1
 
-    def __requantize(self, gr: int, ch: int):
-        """
-        The reduced samples are rescaled to their original scales and precisions.
-        :param gr: the granule
-        :param ch: the channel
-        """
-        exp1: float
-        exp2: float
-        window = 0
-        sfb = 0
-        SCALEFAC_MULT = 0.5 if self.__side_info.scalefac_scale[gr][ch] == 0 else 1
-
-        sample = 0
-        i = 0
-        while sample < NUM_OF_SAMPLES:
-            if self.__side_info.block_type[gr][ch] == 2 or (self.__side_info.mixed_block_flag[gr][ch] and sfb >= 8):
-                short_win_val = self.__header.band_width.short_win[sfb] if sfb < len(self.__header.band_width.short_win
-                                                                                     ) else 0
-                if i == short_win_val:
-                    i = 0
-                    if window == 2:
-                        window = 0
-                        sfb += 1
-                    else:
-                        window += 1
-
-                exp1 = self.__side_info.global_gain[gr][ch] - 210.0 - 8.0 * self.__side_info.subblock_gain[gr][ch][
-                    window]
-                exp2 = SCALEFAC_MULT * self.__side_info.scalefac_s[gr][ch][window][sfb]
-            else:
-                if sample == self.__header.band_index.long_win[sfb + 1]:
-                    # Don't increment sfb at the zeroth sample.
-                    sfb += 1
-
-                exp1 = self.__side_info.global_gain[gr][ch] - 210.0
-
-                pretab_val = tables.pretab[sfb] if sfb < len(tables.pretab) else 0
-                exp2 = SCALEFAC_MULT * (
-                        self.__side_info.scalefac_l[gr][ch][sfb] + self.__side_info.preflag[gr][ch] * pretab_val)
-
-            sign = -1.0 if self.__samples[gr][ch][sample] < 0 else 1.0
-            a = pow(abs(self.__samples[gr][ch][sample]), 4.0 / 3.0)
-            b = pow(2.0, exp1 / 4.0)
-            c = pow(2.0, -exp2)
-
-            self.__samples[gr][ch][sample] = sign * a * b * c
-
-            sample += 1
-            i += 1
-
     def __ms_stereo(self, gr: int):
         """
         The left and right channels are added together to form the middle channel. The
@@ -504,50 +616,6 @@ class Frame:
                 self.__samples[gr][ch][offset1] = s1 * cs[sample] - s2 * ca[sample]
                 self.__samples[gr][ch][offset2] = s2 * cs[sample] + s1 * ca[sample]
 
-    def __imdct(self, gr: int, ch: int):
-        """
-        Inverted modified discrete cosine transformations (IMDCT) are applied to each sample and are afterwards windowed
-        to fit their window shape. As an addition, the samples are overlapped.
-        :param gr: the granule
-        :param ch: the channel
-        """
-        sample_block = np.zeros(36)
-        n = 12 if self.side_info.block_type[gr][ch] == 2 else 36
-        half_n = int(n / 2)
-        sample = 0
-
-        for block in range(32):
-            for win in range(3 if self.side_info.block_type[gr][ch] == 2 else 1):
-                for i in range(n):
-                    xi = 0.0
-                    for k in range(half_n):
-                        s = self.__samples[gr][ch][18 * block + half_n * win + k]
-                        xi += s * math.cos(math.pi / (2 * n) * (2 * i + 1 + half_n) * (2 * k + 1))
-
-                    # Windowing samples.
-                    sample_block[win * n + i] = xi * self.__sine_block[int(self.side_info.block_type[gr][ch])][i]
-
-            if self.side_info.block_type[gr][ch] == 2:
-                temp_block = np.copy(sample_block)
-                for i in range(6):
-                    sample_block[i] = 0
-                for i in range(6, 12):
-                    sample_block[i] = temp_block[0 + i - 6]
-                for i in range(12, 18):
-                    sample_block[i] = temp_block[0 + i - 6] + temp_block[12 + i - 12]
-                for i in range(18, 24):
-                    sample_block[i] = temp_block[12 + i - 12] + temp_block[24 + i - 18]
-                for i in range(24, 30):
-                    sample_block[i] = temp_block[24 + i - 18]
-                for i in range(30, 36):
-                    sample_block[i] = 0
-
-            # Overlap.
-            for i in range(18):
-                self.__samples[gr][ch][sample + i] = sample_block[i] + self.__prev_samples[ch][block][i]
-                self.__prev_samples[ch][block][i] = sample_block[18 + i]
-            sample += 18
-
     def __frequency_inversion(self, gr: int, ch: int):
         """
         :param gr: the granule
@@ -556,42 +624,6 @@ class Frame:
         for sb in range(1, 18, 2):
             for i in range(1, 32, 2):
                 self.__samples[gr][ch][i * 18 + sb] *= -1
-
-    def __synth_filterbank(self, gr: int, ch: int):
-        """
-        :param gr: the granule
-        :param ch: the channel
-        """
-        s, u, w = np.zeros(32), np.zeros(512), np.zeros(512)
-        pcm = np.zeros(576)
-
-        for sb in range(18):
-            for i in range(32):
-                s[i] = self.__samples[gr][ch][i * 18 + sb]
-
-            for i in range(1023, 63, -1):
-                self.__fifo[ch][i] = self.__fifo[ch][i - 64]
-
-            for i in range(64):
-                self.__fifo[ch][i] = 0.0
-                for j in range(32):
-                    self.__fifo[ch][i] += s[j] * self.__synth_filterbank_block[i][j]
-
-            for i in range(8):
-                for j in range(32):
-                    u[i * 64 + j] = self.__fifo[ch][i * 128 + j]
-                    u[i * 64 + j + 32] = self.__fifo[ch][i * 128 + j + 96]
-
-            for i in range(512):
-                w[i] = u[i] * synth_window[i]
-
-            for i in range(32):
-                sum = 0
-                for j in range(16):
-                    sum += w[j * 32 + i]
-                pcm[32 * sb + i] = sum
-
-        self.__samples[gr][ch] = pcm
 
     def __interleave(self):
         for gr in range(2):
@@ -633,7 +665,7 @@ class Frame:
     def get_bitrate(self):
         return self.__header.bit_rate
 
-    def __get_frame_huffman_tables(self):  # TODO
+    def __get_frame_huffman_tables(self):
         """
         :return: list that contains all the huffman tables used in that frame
         """

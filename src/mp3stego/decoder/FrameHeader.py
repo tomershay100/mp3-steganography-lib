@@ -126,20 +126,20 @@ class FrameHeader:
         :return:
         """
         if self.__sampling_rate == 32000:
-            self.__band_index.short_win = band_index_table.short_32
-            self.__band_width.short_win = band_width_table.short_32
-            self.__band_index.long_win = band_index_table.long_32
-            self.__band_width.long_win = band_width_table.long_32
+            self.__band_index.short_win = np.array(band_index_table.short_32)
+            self.__band_width.short_win = np.array(band_width_table.short_32)
+            self.__band_index.long_win = np.array(band_index_table.long_32)
+            self.__band_width.long_win = np.array(band_width_table.long_32)
         elif self.__sampling_rate == 44100:
-            self.__band_index.short_win = band_index_table.short_44
-            self.__band_width.short_win = band_width_table.short_44
-            self.__band_index.long_win = band_index_table.long_44
-            self.__band_width.long_win = band_width_table.long_44
+            self.__band_index.short_win = np.array(band_index_table.short_44)
+            self.__band_width.short_win = np.array(band_width_table.short_44)
+            self.__band_index.long_win = np.array(band_index_table.long_44)
+            self.__band_width.long_win = np.array(band_width_table.long_44)
         elif self.__sampling_rate == 48000:
-            self.__band_index.short_win = band_index_table.short_48
-            self.__band_width.short_win = band_width_table.short_48
-            self.__band_index.long_win = band_index_table.long_48
-            self.__band_width.long_win = band_width_table.long_48
+            self.__band_index.short_win = np.array(band_index_table.short_48)
+            self.__band_width.short_win = np.array(band_width_table.short_48)
+            self.__band_index.long_win = np.array(band_index_table.long_48)
+            self.__band_width.long_win = np.array(band_width_table.long_48)
 
     def __set_channel_mode(self):
         """
