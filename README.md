@@ -87,6 +87,7 @@ in [UML](https://github.com/tomershay100/mp3-steganography-lib/blob/main/src/uml
 3. [SciPy](https://scipy.org/install/)
 4. [TQDM](https://github.com/tqdm/tqdm)
 5. [bitarray](https://pypi.org/project/bitarray/)
+6. [numba](https://numba.readthedocs.io/en/stable/user/installing.html)
 
 you can also see in `requirements.txt` file
 
