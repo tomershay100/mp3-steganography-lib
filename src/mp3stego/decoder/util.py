@@ -1,5 +1,3 @@
-import numpy as np
-
 BYTE_LENGTH = 8
 
 H0 = {3, 6, 8, 11, 12, 15, 17, 19, 21, 23, 24, 26, 28, 30}
@@ -21,7 +19,7 @@ def char_to_int(four_bytes: list) -> int:
     return int(num)
 
 
-def get_bits(buffer: np.ndarray, start_bit: int, slice_len: int):
+def get_bits(buffer: list, start_bit: int, slice_len: int):
     """
     Assumes that end_bit is greater than start_bit and that the result is less than 32 bits, length of an unsigned type.
 
@@ -42,7 +40,7 @@ def get_bits(buffer: np.ndarray, start_bit: int, slice_len: int):
     buff_len = len(buffer)
     if end_byte >= buff_len:
         # pad with zeros
-        buff_copy = np.append(buff_copy, np.array([0 for _ in range(end_byte - buff_len + 1)]))
+        buff_copy.extend([0 for _ in range(end_byte - buff_len + 1)])
 
     bits = []
     for idx in range(start_byte, end_byte + 1):

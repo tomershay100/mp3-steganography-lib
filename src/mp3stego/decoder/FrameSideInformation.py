@@ -36,7 +36,7 @@ class FrameSideInformation:
         self.__scalefac_l: np.ndarray = np.zeros((2, 2, 22))
         self.__scalefac_s: np.ndarray = np.zeros((2, 2, 3, 13))
 
-    def set_side_info(self, buffer: np.ndarray, header: FrameHeader):
+    def set_side_info(self, buffer: list, header: FrameHeader):
         """
         The side information contains information on how to decode the main_data.
 
