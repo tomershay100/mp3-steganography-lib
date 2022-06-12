@@ -51,7 +51,7 @@ class Steganography:
             binary_str = str_to_binary_str(massage)
 
         self.__encoder = Encoder(wav_file_path, output_file_path, bitrate=bitrate, hide_str=binary_str)
-        self.__encoder.encode(quiet=quiet)
+        return self.__encoder.encode(quiet=quiet)
 
     def __decode(self, input_file_path: str, wav_file_path: str, quiet: bool = True, reveal: bool = False,
                  txt_file_path: str = ""):
@@ -148,6 +148,9 @@ class Steganography:
         :type output_file_path: str
         :param message: the message to hide in the mp3 file.
         :type message: str
+
+        :return True if the mp3 is too short to contain the message.
+        :rtype bool
         """
         if not self.quiet:
             print(f"\n##################\nStart Hiding {message} in {output_file_path}.")
@@ -155,11 +158,12 @@ class Steganography:
         self.__decode(input_file_path, wav_file_path, reveal=False, quiet=self.quiet)
 
         self.__check_for_encoder(wav_file_path, output_file_path)
-        self.__encode(wav_file_path, output_file_path, hide=True, bitrate=self.__bitrate, quiet=self.quiet,
-                      massage=message)
+        too_short = self.__encode(wav_file_path, output_file_path, hide=True, bitrate=self.__bitrate, quiet=self.quiet,
+                                  massage=message)
         self.__delete_wav_file(quiet=self.quiet)
         if not self.quiet:
             print(f"\nFinished Hiding.\n##################")
+        return too_short
 
     def clear_file(self, input_file_path: str, output_file_path: str):
         """
