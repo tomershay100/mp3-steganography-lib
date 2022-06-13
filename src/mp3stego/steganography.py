@@ -7,10 +7,6 @@ from mp3stego import Decoder
 from mp3stego import Encoder
 
 
-# TODO add more information prints when quiet is off
-# TODO add more comments
-# TODO change function and variables names
-
 def str_to_binary_str(string: str) -> str:
     """
     Convert string into string of bits.

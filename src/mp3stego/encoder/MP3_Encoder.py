@@ -180,14 +180,14 @@ def count1_bitcount(ix, cod_info):
 
         p = v + (w << 1) + (x << 2) + (y << 3)
 
-        signbits = 0
-        signbits += (v != 0)
-        signbits += (w != 0)
-        signbits += (x != 0)
-        signbits += (y != 0)
+        sign_bits = 0
+        sign_bits += (v != 0)
+        sign_bits += (w != 0)
+        sign_bits += (x != 0)
+        sign_bits += (y != 0)
 
-        sum0 += signbits
-        sum1 += signbits
+        sum0 += sign_bits
+        sum1 += sign_bits
 
         sum0 += tables.huffman_table[32].hlen[p]
         sum1 += tables.huffman_table[33].hlen[p]
@@ -202,10 +202,11 @@ def count1_bitcount(ix, cod_info):
         return sum1
 
 
-# Count the number of bits necessary to code the subregion.
 @njit
 def count_bit(ix, start, end, table, ylen, linbits, hlen):
     """
+    Count the number of bits necessary to code the subregion.
+
     :param hlen:
     :param linbits:
     :param ylen:
@@ -255,6 +256,7 @@ def count_bit(ix, start, end, table, ylen, linbits, hlen):
 def calc_runlen(ix, cod_info):
     """
     Calculation of rzero, count1, big_values (partitions ix into big values, quadruples and zeros).
+
     :param ix: self.__l3_enc[ch][gr], vector of quantized values ix(0..575)
     :param cod_info: self.__side_info.gr[gr].ch[ch].tt
     """
