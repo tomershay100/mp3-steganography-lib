@@ -44,13 +44,13 @@ class Encoder:
         self.__encoder.encode()
 
         self.__encoder.write_mp3_file(self.__output_file_path)
-        too_short = False
+        too_long = False
         if not quiet:
             if self.__encoder.hide_str_offset < len(self.__hide_str) - 1:
                 print("File too short for this message length, your message has been trimmed.")
-                too_short = True
+                too_long = True
             print(f"MP3 file created on {self.__output_file_path}")
-        return too_short
+        return too_long
 
 
 if __name__ == "__main__":
