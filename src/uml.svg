@@ -215,7 +215,7 @@ class mp3stego.encoder.MP3_Encoder.GR {
 }
 class mp3stego.encoder.MP3_Encoder.GrInfo {
   table_select: []
-  slen: []
+  s_len: []
   part2_3_length: int
   big_values: int
   count1: int
@@ -252,14 +252,14 @@ class mp3stego.encoder.MP3_Encoder.MDCT {
 class mp3stego.encoder.MP3_Encoder.MP3Encoder {
   __wav_file: WavReader
   __ratio: ndarray
-  __scalefactor: ScaleFactor
+  __scale_factor: ScaleFactor
   __pe: ndarray
   __l3_enc: ndarray
   __l3_sb_sample: ndarray
   __mdct_freq: ndarray
   __l3loop: L3Loop
   __mdct: MDCT
-  __subband: Subband
+  __sub_band: Subband
   __side_info: SideInfo
   __mpeg: MPEG
   __resv_max: int
@@ -321,12 +321,12 @@ class mp3stego.encoder.encoder.Encoder {
   __encoder: MP3Encoder
 }
 class mp3stego.encoder.tables.HuffCodeTab {
-  xlen: int
-  ylen: int
-  linbits: int
-  linmax: int
+  x_len: int
+  y_len: int
+  lin_bits: int
+  lin_max: int
   table: list
-  hlen: list
+  h_len: list
 }
 class mp3stego.steganography.Steganography {
   quiet: bool

@@ -23,11 +23,11 @@ def get_bits(buffer: list, start_bit: int, slice_len: int):
     """
     Assumes that end_bit is greater than start_bit and that the result is less than 32 bits, length of an unsigned type.
 
-    :param buffer: the buffer
+    :param buffer: buffer of bytes
     :param start_bit: the starting bit
     :param slice_len: the length
 
-    :return: the bits from buffer[start_bit] to buffer[start_bit + slice_len]
+    :return: the bits from buffer[start_bit] to buffer[start_bit + slice_len]. transform the bytes from buffer into bits
     """
     # exclude the last bit of the slice
     end_bit = start_bit + slice_len - 1

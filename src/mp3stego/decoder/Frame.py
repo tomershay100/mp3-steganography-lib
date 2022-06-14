@@ -497,7 +497,7 @@ class Frame:
                         values = (row, col)
                         for i in range(2):
 
-                            # linbits extend the sample's size if needed.
+                            # lin_bits extend the sample's size if needed.
                             linbit = 0
                             if big_value_linbit[table_num] != 0 and values[i] == big_value_max[table_num] - 1:
                                 linbit = util.get_bits(self.__main_data, bit, big_value_linbit[table_num])
@@ -531,8 +531,8 @@ class Frame:
             else:
                 bit_sample = util.get_bits(self.__main_data, bit, 32)
                 for entry in range(16):
-                    value = quad_table_1.hcod[entry]
-                    size = quad_table_1.hlen[entry]
+                    value = quad_table_1.h_cod[entry]
+                    size = quad_table_1.h_len[entry]
 
                     if value >> (32 - size) == bit_sample >> (32 - size):
                         bit += size

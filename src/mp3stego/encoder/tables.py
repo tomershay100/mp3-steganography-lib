@@ -252,20 +252,20 @@ t33l = [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
 
 @dataclass
 class HuffCodeTab:
-    xlen: int  # max. x-index+
-    ylen: int  # max. y-index+
-    linbits: int  # number of linbits
-    linmax: int  # max number to be stored in linbits
-    table: list  # pointer to array[xlen][ylen]
-    hlen: list  # pointer to array[xlen][ylen]
+    x_len: int  # max. x-index+
+    y_len: int  # max. y-index+
+    lin_bits: int  # number of lin_bits
+    lin_max: int  # max number to be stored in lin_bits
+    table: list  # pointer to array[x_len][y_len]
+    h_len: list  # pointer to array[x_len][y_len]
 
-    def __init__(self, xlen, ylen, linbits, linmax, table, hlen):
-        self.xlen = xlen
-        self.ylen = ylen
-        self.linbits = linbits
-        self.linmax = linmax
+    def __init__(self, x_len, y_len, lin_bits, lin_max, table, h_len):
+        self.x_len = x_len
+        self.y_len = y_len
+        self.lin_bits = lin_bits
+        self.lin_max = lin_max
         self.table = table
-        self.hlen = hlen
+        self.h_len = h_len
 
 
 huffman_table = [HuffCodeTab(0, 0, 0, 0, None, None),

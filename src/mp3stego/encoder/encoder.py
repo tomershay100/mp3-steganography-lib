@@ -1,6 +1,5 @@
 import os
 import sys
-import time
 
 from mp3stego.encoder.MP3_Encoder import MP3Encoder
 from mp3stego.encoder.WAV_Reader import WavReader
@@ -31,13 +30,15 @@ class Encoder:
         self.__hide_str: str = hide_str
         self.__encoder: MP3Encoder = MP3Encoder(self.__wav_file, hide_str=hide_str)
 
-    def encode(self, quiet: bool = True):
+    def encode(self, quiet: bool = True) -> bool:
         """
         Encoding the input wav file into mp3 file. can also hide string in the file.
 
         :param quiet: if False, print some information about the decoding process
         :type quiet: bool
 
+        :return True if the message is too long for hiding in this mp3 file.
+        :rtype bool
         """
         if not quiet:
             self.__encoder.print_info()
@@ -51,18 +52,3 @@ class Encoder:
                 too_long = True
             print(f"MP3 file created on {self.__output_file_path}")
         return too_long
-
-
-if __name__ == "__main__":
-    start = time.time()
-
-    if len(sys.argv) > 2:
-        sys.exit('Unexpected number of arguments.')
-    if len(sys.argv) < 2:
-        sys.exit('No directory specified.')
-    file_path = sys.argv[1]
-
-    e = Encoder(file_path, file_path)
-    e.encode()
-
-    print(f'Execution time: {int(time.time() - start)} seconds')
