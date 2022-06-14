@@ -115,16 +115,3 @@ class Decoder:
         """
         if os.path.exists(self.__output_file_path):
             os.remove(self.__output_file_path)
-
-
-if __name__ == '__main__':
-    if len(sys.argv) > 2:
-        print("Unexpected number of arguments.")
-        exit(-1)
-    if len(sys.argv) < 2:
-        print("No directory specified.")
-        exit(-1)
-    file_path = sys.argv[1]
-
-    d = Decoder(file_path, file_path[:-3] + 'wav')
-    d.decode()

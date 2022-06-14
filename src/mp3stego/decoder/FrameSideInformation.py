@@ -17,7 +17,7 @@ class FrameSideInformation:
         self.__part2_length: np.ndarray = np.zeros((2, 2))
         self.__big_value: np.ndarray = np.zeros((2, 2))
         self.__global_gain: np.ndarray = np.zeros((2, 2))
-        self.__scalefac_compress: np.ndarray = np.zeros((2, 2))
+        self.__scale_fac_compress: np.ndarray = np.zeros((2, 2))
         self.__slen1: np.ndarray = np.zeros((2, 2))
         self.__slen2: np.ndarray = np.zeros((2, 2))
         self.__window_switching: np.ndarray = np.zeros((2, 2))
@@ -26,22 +26,22 @@ class FrameSideInformation:
         self.__switch_point_l: np.ndarray = np.zeros((2, 2))
         self.__switch_point_s: np.ndarray = np.zeros((2, 2))
         self.__table_select: np.ndarray = np.zeros((2, 2, 3))
-        self.__subblock_gain: np.ndarray = np.zeros((2, 2, 3))
+        self.__sub_block_gain: np.ndarray = np.zeros((2, 2, 3))
         self.__region0_count: np.ndarray = np.zeros((2, 2))
         self.__region1_count: np.ndarray = np.zeros((2, 2))
-        self.__preflag: np.ndarray = np.zeros((2, 2))
-        self.__scalefac_scale: np.ndarray = np.zeros((2, 2))
+        self.__pre_flag: np.ndarray = np.zeros((2, 2))
+        self.__scale_fac_scale: np.ndarray = np.zeros((2, 2))
         self.__count1table_select: np.ndarray = np.zeros((2, 2))
 
-        self.__scalefac_l: np.ndarray = np.zeros((2, 2, 22))
-        self.__scalefac_s: np.ndarray = np.zeros((2, 2, 3, 13))
+        self.__scale_fac_l: np.ndarray = np.zeros((2, 2, 22))
+        self.__scale_fac_s: np.ndarray = np.zeros((2, 2, 3, 13))
 
     def set_side_info(self, buffer: list, header: FrameHeader):
         """
         The side information contains information on how to decode the main_data.
 
         :param buffer: buffer that contains the mp3 file, from the first byte of the side info.
-        :param header: The frame header
+        :param header: The frame header.
         """
 
         offset = 0
@@ -73,14 +73,14 @@ class FrameSideInformation:
                 self.__global_gain[gr][ch] = get_bits(buffer, offset, 8)
                 offset += 8
                 # Used to determine the values of slen1 and slen2.
-                self.__scalefac_compress[gr][ch] = get_bits(buffer, offset, 4)
+                self.__scale_fac_compress[gr][ch] = get_bits(buffer, offset, 4)
                 offset += 4
                 # Number of bits given to a range of scale factors.
                 # - Normal blocks: slen1 0 - 10, slen2 11-20
                 # - Short blocks: Short blocks && mixed_block_flag == 1: slen1 0 - 5, slen2 6-11
                 # - Short blocks && mixed_block_flag == 0:
-                self.__slen1[gr][ch] = slen[int(self.__scalefac_compress[gr][ch])][0]
-                self.__slen2[gr][ch] = slen[int(self.__scalefac_compress[gr][ch])][1]
+                self.__slen1[gr][ch] = slen[int(self.__scale_fac_compress[gr][ch])][0]
+                self.__slen2[gr][ch] = slen[int(self.__scale_fac_compress[gr][ch])][1]
                 # If set, a not normal window is being used.
                 self.__window_switching[gr][ch] = get_bits(buffer, offset, 1) == 1
                 offset += 1
@@ -106,7 +106,7 @@ class FrameSideInformation:
                         self.__table_select[gr][ch][region] = get_bits(buffer, offset, 5)
                         offset += 5
                     for window in range(3):
-                        self.__subblock_gain[gr][ch][window] = get_bits(buffer, offset, 3)
+                        self.__sub_block_gain[gr][ch][window] = get_bits(buffer, offset, 3)
                         offset += 3
 
                 else:
@@ -127,10 +127,10 @@ class FrameSideInformation:
                     # scale factor bands is 12*3 = 36
 
                 # if set, adds values from a table to the scaling factor
-                self.__preflag[gr][ch] = get_bits(buffer, offset, 1)
+                self.__pre_flag[gr][ch] = get_bits(buffer, offset, 1)
                 offset += 1
                 # Determines the step size.
-                self.__scalefac_scale[gr][ch] = get_bits(buffer, offset, 1)
+                self.__scale_fac_scale[gr][ch] = get_bits(buffer, offset, 1)
                 offset += 1
                 # Table that determines which count1 table is used.
                 self.__count1table_select[gr][ch] = get_bits(buffer, offset, 1)
@@ -161,8 +161,8 @@ class FrameSideInformation:
         return self.__global_gain
 
     @property
-    def scalefac_compress(self):
-        return self.__scalefac_compress
+    def scale_fac_compress(self):
+        return self.__scale_fac_compress
 
     @property
     def slen1(self):
@@ -197,8 +197,8 @@ class FrameSideInformation:
         return self.__table_select
 
     @property
-    def subblock_gain(self):
-        return self.__subblock_gain
+    def sub_block_gain(self):
+        return self.__sub_block_gain
 
     @property
     def region0_count(self):
@@ -209,21 +209,21 @@ class FrameSideInformation:
         return self.__region1_count
 
     @property
-    def preflag(self):
-        return self.__preflag
+    def pre_flag(self):
+        return self.__pre_flag
 
     @property
-    def scalefac_scale(self):
-        return self.__scalefac_scale
+    def scale_fac_scale(self):
+        return self.__scale_fac_scale
 
     @property
     def count1table_select(self):
         return self.__count1table_select
 
     @property
-    def scalefac_l(self):
-        return self.__scalefac_l
+    def scale_fac_l(self):
+        return self.__scale_fac_l
 
     @property
-    def scalefac_s(self):
-        return self.__scalefac_s
+    def scale_fac_s(self):
+        return self.__scale_fac_s

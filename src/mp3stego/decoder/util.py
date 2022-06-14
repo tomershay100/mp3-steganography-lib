@@ -23,11 +23,11 @@ def get_bits(buffer: list, start_bit: int, slice_len: int):
     """
     Assumes that end_bit is greater than start_bit and that the result is less than 32 bits, length of an unsigned type.
 
-    :param buffer:
-    :param start_bit:
-    :param slice_len:
+    :param buffer: the buffer
+    :param start_bit: the starting bit
+    :param slice_len: the length
 
-    :return:
+    :return: the bits from buffer[start_bit] to buffer[start_bit + slice_len]
     """
     # exclude the last bit of the slice
     end_bit = start_bit + slice_len - 1
@@ -67,7 +67,9 @@ def get_bits(buffer: list, start_bit: int, slice_len: int):
 def bit_from_huffman_tables(all_huffman_tables):
     """
     calc the bits from the huffman tables, according to the steganography
-    :param all_huffman_tables:
+
+    :param all_huffman_tables: list of huffman tables used.
+
     :return: string contains bits
     """
 

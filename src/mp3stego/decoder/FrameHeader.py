@@ -51,6 +51,7 @@ class FrameHeader:
     def init_header_params(self, buffer):
         """
         Unpack the MP3 header.
+
         :param buffer: buffer that contains the mp3 file bytes, starts with the first bytes of teh header.
         """
         self.__buffer = buffer
@@ -81,7 +82,8 @@ class FrameHeader:
 
     def __set_layer(self, byte):
         """
-        Determine layer
+        Determine MPEG layer.
+
         :param byte: the first byte of the header
         """
         byte = (byte << 5) % MAX_BYTE_VALUE
@@ -109,7 +111,7 @@ class FrameHeader:
 
     def __set_sampling_rate(self):
         """
-        Sampling rate
+        set sampling rate.
         """
         rates = [[44100, 48000, 32000], [22050, 24000, 16000], [11025, 12000, 8000]]
         ceil_mpeg_version = int(math.floor(self.__mpeg_version))
@@ -123,7 +125,6 @@ class FrameHeader:
     def __set_tables(self):
         """
         During the decoding process different tables are used depending on the sampling rate.
-        :return:
         """
         if self.__sampling_rate == 32000:
             self.__band_index.short_win = np.array(band_index_table.short_32)

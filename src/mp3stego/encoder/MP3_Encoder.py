@@ -9,6 +9,12 @@ from mp3stego.encoder import tables
 from mp3stego.encoder import util
 from mp3stego.encoder.WAV_Reader import WavReader
 
+NUM_OF_HUF_TABLES = 32
+
+MAX_BITS_ALLOWANCE = 4095
+MAX_QUANTIZE_STEP = 8192
+NUM_OF_HUFFMAN_TABLE_WITHOUT_LINBITS = 15
+
 
 @dataclass
 class Subband:
@@ -309,9 +315,9 @@ def bigv_bitcount(ix, cod_info):
 @njit
 def window_filter_subband(s, ch, x, off, fl):
     """
-    :param fl:
-    :param off:
-    :param x:
+    :param fl: self.__l3_sb_sample[ch, gr + 1, k, :]
+    :param off: self.__subband.off
+    :param x: self.__subband.x
     :param s: self.__l3_sb_sample[ch, gr + 1, k, :]
     :param ch: the channel
     :return:
@@ -358,15 +364,15 @@ def window_filter_subband(s, ch, x, off, fl):
 @njit
 def quantize(ix, step_size, step_tab_i, xr_max, xr, int2idx, step_tab, xr_abs):
     """
-    :param xr_abs:
-    :param step_tab:
-    :param int2idx:
-    :param xr:
-    :param xr_max:
-    :param step_tab_i:
+    :param xr_abs: self.__l3loop.xrabs
+    :param step_tab:  self.__l3loop.steptab
+    :param int2idx:  self.__l3loop.int2idx
+    :param xr:  self.__l3loop.xr
+    :param xr_max:  self.__l3loop.xrmax
+    :param step_tab_i: self.__l3loop.steptabi
     :param ix: self.__l3_enc[ch][gr], vector of quantized values ix(0..575)
     :param step_size:
-    :return:
+    :return: the step size
     """
     ix_max = 0
     scalei = step_tab_i[step_size + 127]  # 2**(-stepsize/4)
@@ -398,36 +404,37 @@ def quantize(ix, step_size, step_tab_i, xr_max, xr, int2idx, step_tab, xr_abs):
 
 
 # Tables 0 and 14 are not used.
-idx_to_transform_idx = {(1, 1): 1, (1, 0): 3,
-                        (2, 1): 2, (2, 0): 3,
-                        (3, 1): 2, (3, 0): 3,
-                        (5, 1): 5, (5, 0): 6,
-                        (6, 1): 5, (6, 0): 6,
-                        (7, 1): 7, (7, 0): 8,
-                        (8, 1): 7, (8, 0): 8,
-                        (9, 1): 9, (9, 0): 8,
-                        (10, 1): 10, (10, 0): 11,
-                        (11, 1): 10, (11, 0): 11,
-                        (12, 1): 10, (12, 0): 12,
-                        (13, 1): 13, (13, 0): 15,
-                        (15, 1): 13, (15, 0): 15,
-                        (16, 1): 16, (16, 0): 17,
-                        (17, 1): 18, (17, 0): 17,
-                        (18, 1): 18, (18, 0): 19,
-                        (19, 1): 20, (19, 0): 19,
-                        (20, 1): 20, (20, 0): 21,
-                        (21, 1): 22, (21, 0): 21,
-                        (22, 1): 22, (22, 0): 23,
-                        (23, 1): 31, (23, 0): 23,
-                        (24, 1): 25, (24, 0): 24,
-                        (25, 1): 25, (25, 0): 26,
-                        (26, 1): 27, (26, 0): 26,
-                        (27, 1): 27, (27, 0): 28,
-                        (28, 1): 29, (28, 0): 28,
-                        (29, 1): 29, (29, 0): 30,
-                        (30, 1): 31, (30, 0): 30,
-                        (31, 1): 31, (31, 0): 23,
-                        }
+idx_to_transform_idx = {
+    (1, 1): 1, (1, 0): 3,
+    (2, 1): 2, (2, 0): 3,
+    (3, 1): 2, (3, 0): 3,
+    (5, 1): 5, (5, 0): 6,
+    (6, 1): 5, (6, 0): 6,
+    (7, 1): 7, (7, 0): 8,
+    (8, 1): 7, (8, 0): 8,
+    (9, 1): 9, (9, 0): 8,
+    (10, 1): 10, (10, 0): 11,
+    (11, 1): 10, (11, 0): 11,
+    (12, 1): 10, (12, 0): 12,
+    (13, 1): 13, (13, 0): 15,
+    (15, 1): 13, (15, 0): 15,
+    (16, 1): 16, (16, 0): 17,
+    (17, 1): 18, (17, 0): 17,
+    (18, 1): 18, (18, 0): 19,
+    (19, 1): 20, (19, 0): 19,
+    (20, 1): 20, (20, 0): 21,
+    (21, 1): 22, (21, 0): 21,
+    (22, 1): 22, (22, 0): 23,
+    (23, 1): 31, (23, 0): 23,
+    (24, 1): 25, (24, 0): 24,
+    (25, 1): 25, (25, 0): 26,
+    (26, 1): 27, (26, 0): 26,
+    (27, 1): 27, (27, 0): 28,
+    (28, 1): 29, (28, 0): 28,
+    (29, 1): 29, (29, 0): 30,
+    (30, 1): 31, (30, 0): 30,
+    (31, 1): 31, (31, 0): 23,
+}
 
 
 class MP3Encoder:
@@ -645,15 +652,16 @@ class MP3Encoder:
                         self.__l3_sb_sample[ch][gr + 1][k + 1][band] *= -1
 
                 # Perform imdct of 18 previous subband samples + 18 current subband samples
+                num_prev_subband = 18
                 for band in range(32):
-                    for k in range(18 - 1, -1, -1):
+                    for k in range(num_prev_subband - 1, -1, -1):
                         mdct_in[k] = self.__l3_sb_sample[ch][gr][k][band]
-                        mdct_in[k + 18] = self.__l3_sb_sample[ch][gr + 1][k][band]
+                        mdct_in[k + num_prev_subband] = self.__l3_sb_sample[ch][gr + 1][k][band]
 
                     # Calculation of the MDCT
                     # In the case of long blocks ( block_type 0,1,3 ) there are
                     # 36 coefficients in the time domain and 18 in the frequency domain.
-                    for k in range(18 - 1, -1, -1):
+                    for k in range(num_prev_subband - 1, -1, -1):
                         vm = util.mul(mdct_in[35], self.__mdct.cos_l[k][35])
                         for j in range(35, 0, -7):
                             vm += util.mul(mdct_in[j - 1], self.__mdct.cos_l[k][j - 1])
@@ -667,29 +675,45 @@ class MP3Encoder:
 
                     # Perform aliasing reduction butterfly
                     if band != 0:
-                        self.__mdct_freq[ch][gr][band][0], self.__mdct_freq[ch][gr][band - 1][17 - 0] = util.cmuls(
-                            self.__mdct_freq[ch][gr][band][0], self.__mdct_freq[ch][gr][band - 1][17 - 0],
+                        self.__mdct_freq[ch][gr][band][0], self.__mdct_freq[ch][gr][band - 1][
+                            num_prev_subband - 1 - 0] = util.cmuls(
+                            self.__mdct_freq[ch][gr][band][0],
+                            self.__mdct_freq[ch][gr][band - 1][num_prev_subband - 1 - 0],
                             tables.MDCT_CS0, tables.MDCT_CA0)
-                        self.__mdct_freq[ch][gr][band][1], self.__mdct_freq[ch][gr][band - 1][17 - 1] = util.cmuls(
-                            self.__mdct_freq[ch][gr][band][1], self.__mdct_freq[ch][gr][band - 1][17 - 1],
+                        self.__mdct_freq[ch][gr][band][1], self.__mdct_freq[ch][gr][band - 1][
+                            num_prev_subband - 1 - 1] = util.cmuls(
+                            self.__mdct_freq[ch][gr][band][1],
+                            self.__mdct_freq[ch][gr][band - 1][num_prev_subband - 1 - 1],
                             tables.MDCT_CS1, tables.MDCT_CA1)
-                        self.__mdct_freq[ch][gr][band][2], self.__mdct_freq[ch][gr][band - 1][17 - 2] = util.cmuls(
-                            self.__mdct_freq[ch][gr][band][2], self.__mdct_freq[ch][gr][band - 1][17 - 2],
+                        self.__mdct_freq[ch][gr][band][2], self.__mdct_freq[ch][gr][band - 1][
+                            num_prev_subband - 1 - 2] = util.cmuls(
+                            self.__mdct_freq[ch][gr][band][2],
+                            self.__mdct_freq[ch][gr][band - 1][num_prev_subband - 1 - 2],
                             tables.MDCT_CS2, tables.MDCT_CA2)
-                        self.__mdct_freq[ch][gr][band][3], self.__mdct_freq[ch][gr][band - 1][17 - 3] = util.cmuls(
-                            self.__mdct_freq[ch][gr][band][3], self.__mdct_freq[ch][gr][band - 1][17 - 3],
+                        self.__mdct_freq[ch][gr][band][3], self.__mdct_freq[ch][gr][band - 1][
+                            num_prev_subband - 1 - 3] = util.cmuls(
+                            self.__mdct_freq[ch][gr][band][3],
+                            self.__mdct_freq[ch][gr][band - 1][num_prev_subband - 1 - 3],
                             tables.MDCT_CS3, tables.MDCT_CA3)
-                        self.__mdct_freq[ch][gr][band][4], self.__mdct_freq[ch][gr][band - 1][17 - 4] = util.cmuls(
-                            self.__mdct_freq[ch][gr][band][4], self.__mdct_freq[ch][gr][band - 1][17 - 4],
+                        self.__mdct_freq[ch][gr][band][4], self.__mdct_freq[ch][gr][band - 1][
+                            num_prev_subband - 1 - 4] = util.cmuls(
+                            self.__mdct_freq[ch][gr][band][4],
+                            self.__mdct_freq[ch][gr][band - 1][num_prev_subband - 1 - 4],
                             tables.MDCT_CS4, tables.MDCT_CA4)
-                        self.__mdct_freq[ch][gr][band][5], self.__mdct_freq[ch][gr][band - 1][17 - 5] = util.cmuls(
-                            self.__mdct_freq[ch][gr][band][5], self.__mdct_freq[ch][gr][band - 1][17 - 5],
+                        self.__mdct_freq[ch][gr][band][5], self.__mdct_freq[ch][gr][band - 1][
+                            num_prev_subband - 1 - 5] = util.cmuls(
+                            self.__mdct_freq[ch][gr][band][5],
+                            self.__mdct_freq[ch][gr][band - 1][num_prev_subband - 1 - 5],
                             tables.MDCT_CS5, tables.MDCT_CA5)
-                        self.__mdct_freq[ch][gr][band][6], self.__mdct_freq[ch][gr][band - 1][17 - 6] = util.cmuls(
-                            self.__mdct_freq[ch][gr][band][6], self.__mdct_freq[ch][gr][band - 1][17 - 6],
+                        self.__mdct_freq[ch][gr][band][6], self.__mdct_freq[ch][gr][band - 1][
+                            num_prev_subband - 1 - 6] = util.cmuls(
+                            self.__mdct_freq[ch][gr][band][6],
+                            self.__mdct_freq[ch][gr][band - 1][num_prev_subband - 1 - 6],
                             tables.MDCT_CS6, tables.MDCT_CA6)
-                        self.__mdct_freq[ch][gr][band][7], self.__mdct_freq[ch][gr][band - 1][17 - 7] = util.cmuls(
-                            self.__mdct_freq[ch][gr][band][7], self.__mdct_freq[ch][gr][band - 1][17 - 7],
+                        self.__mdct_freq[ch][gr][band][7], self.__mdct_freq[ch][gr][band - 1][
+                            num_prev_subband - 1 - 7] = util.cmuls(
+                            self.__mdct_freq[ch][gr][band][7],
+                            self.__mdct_freq[ch][gr][band - 1][num_prev_subband - 1 - 7],
                             tables.MDCT_CS7, tables.MDCT_CA7)
 
             # Save latest granule's subband samples to be used in the next mdct call
@@ -846,8 +870,8 @@ class MP3Encoder:
 
     def __max_reservoir_bits(self, ch, gr):
         """
-        Called at the beginning of each granule to get the max bit
-        allowance for the current granule based on reservoir size and perceptual entropy.
+        Called at the beginning of each granule to get the max bit allowance for the current granule based on reservoir
+        size and perceptual entropy.
         :param ch: the channel
         :param gr: the granule
         """
@@ -858,8 +882,8 @@ class MP3Encoder:
         mean_bits //= self.__wav_file.num_of_channels
         max_bits = mean_bits
 
-        if max_bits > 4095:
-            max_bits = 4095
+        if max_bits > MAX_BITS_ALLOWANCE:
+            max_bits = MAX_BITS_ALLOWANCE
         if not self.__resv_max:
             return max_bits
 
@@ -877,8 +901,8 @@ class MP3Encoder:
             add_bits += over_bits
 
         max_bits += add_bits
-        if max_bits > 4095:
-            max_bits = 4095
+        if max_bits > MAX_BITS_ALLOWANCE:
+            max_bits = MAX_BITS_ALLOWANCE
 
         return max_bits
 
@@ -906,7 +930,7 @@ class MP3Encoder:
 
     def __bin_search_step_size(self, desired_rate, ix, cod_info):
         """
-        Successive approximation approach to obtaining a initial quantizer step size. When BIN_SEARCH is defined, the
+        Successive approximation approach to obtaining an initial quantizer step size. When BIN_SEARCH is defined, the
         outer_loop function precedes the call to the function inner_loop with a call to bin_search gain defined below,
         which returns a good starting quantizer_step_size.
         :param desired_rate:
@@ -921,7 +945,7 @@ class MP3Encoder:
             half = count // 2
 
             if quantize(ix, next + half, self.__l3loop.steptabi, self.__l3loop.xrmax, self.__l3loop.xr,
-                        self.__l3loop.int2idx, self.__l3loop.steptab, self.__l3loop.xrabs) > 8192:
+                        self.__l3loop.int2idx, self.__l3loop.steptab, self.__l3loop.xrabs) > MAX_QUANTIZE_STEP:
                 bit = 100000
             else:
                 calc_runlen(ix, cod_info)  # rzero, count1, big_values
@@ -1020,7 +1044,7 @@ class MP3Encoder:
         while condition:
             while quantize(ix, cod_info.quantizerStepSize + 1, self.__l3loop.steptabi, self.__l3loop.xrmax,
                            self.__l3loop.xr, self.__l3loop.int2idx, self.__l3loop.steptab,
-                           self.__l3loop.xrabs) > 8192:  # within table range?
+                           self.__l3loop.xrabs) > MAX_QUANTIZE_STEP:  # within table range?
                 cod_info.quantizerStepSize += 1
             cod_info.quantizerStepSize += 1
 
@@ -1065,7 +1089,7 @@ class MP3Encoder:
 
             gi = l3_side.gr[0].ch[0].tt
 
-            if gi.part2_3_length + stuffing_bits < 4095:
+            if gi.part2_3_length + stuffing_bits < MAX_BITS_ALLOWANCE:
                 # plan a: put all into the first granule
                 gi.part2_3_length += stuffing_bits
             else:
@@ -1075,7 +1099,7 @@ class MP3Encoder:
                         gi = l3_side.gr[gr].ch[ch].tt
                         if not stuffing_bits:
                             break
-                        extra_bits = 4095 - gi.part2_3_length
+                        extra_bits = MAX_BITS_ALLOWANCE - gi.part2_3_length
                         bits_this_gr = extra_bits if extra_bits < stuffing_bits else stuffing_bits
                         gi.part2_3_length += bits_this_gr
                         stuffing_bits -= bits_this_gr
@@ -1122,9 +1146,9 @@ class MP3Encoder:
 
         choice = [0, 0]
         ix_sum = [0, 0]
-        if ix_max < 15:
+        if ix_max < NUM_OF_HUFFMAN_TABLE_WITHOUT_LINBITS:
             # Try tables with no linbits
-            for i in range(13, -1, -1):
+            for i in range(13, -1, -1):  # 14 is the highest huffman table without linbits, but isn't used
                 if tables.huffman_table[i].xlen > ix_max:
                     choice[0] = i
                     break
@@ -1169,14 +1193,15 @@ class MP3Encoder:
 
         else:
             # Try tables with linbits.
-            ix_max -= 15
+            ix_max -= NUM_OF_HUFFMAN_TABLE_WITHOUT_LINBITS
 
-            for i in range(15, 24):
+            for i in range(NUM_OF_HUFFMAN_TABLE_WITHOUT_LINBITS,
+                           24):  # checks the most optimal huffman table from 15 to 24
                 if tables.huffman_table[i].linmax >= ix_max:
                     choice[0] = i
                     break
 
-            for i in range(24, 32):
+            for i in range(24, NUM_OF_HUF_TABLES):  # checks the most optimal huffman table from 24 to 32
                 if tables.huffman_table[i].linmax >= ix_max:
                     choice[1] = i
                     break
@@ -1383,23 +1408,23 @@ class MP3Encoder:
 
         h = tables.huffman_table[table_select]
         y_len = h.ylen
-        if table_select > 15:  # ESC-table is used
+        if table_select > NUM_OF_HUFFMAN_TABLE_WITHOUT_LINBITS:  # ESC-table is used
             lin_bits_x = 0
             lin_bits_y = 0
             lin_bits = h.linbits
-            if x > 14:
-                lin_bits_x = x - 15
-                x = 15
+            if x > NUM_OF_HUFFMAN_TABLE_WITHOUT_LINBITS - 1:
+                lin_bits_x = x - NUM_OF_HUFFMAN_TABLE_WITHOUT_LINBITS
+                x = NUM_OF_HUFFMAN_TABLE_WITHOUT_LINBITS
 
-            if y > 14:
-                lin_bits_y = y - 15
-                y = 15
+            if y > NUM_OF_HUFFMAN_TABLE_WITHOUT_LINBITS - 1:
+                lin_bits_y = y - NUM_OF_HUFFMAN_TABLE_WITHOUT_LINBITS
+                y = NUM_OF_HUFFMAN_TABLE_WITHOUT_LINBITS
 
             idx = (x * y_len) + y
             code = h.table[idx]
             c_bits = h.hlen[idx]
 
-            if x > 14:
+            if x > NUM_OF_HUFFMAN_TABLE_WITHOUT_LINBITS - 1:
                 ext |= lin_bits_x
                 x_bits += lin_bits
 
@@ -1408,7 +1433,7 @@ class MP3Encoder:
                 ext |= sign_x
                 x_bits += 1
 
-            if y > 14:
+            if y > NUM_OF_HUFFMAN_TABLE_WITHOUT_LINBITS - 1:
                 ext <<= lin_bits
                 ext |= lin_bits_y
                 x_bits += lin_bits

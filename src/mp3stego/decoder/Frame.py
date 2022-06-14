@@ -14,10 +14,11 @@ PI = math.pi
 
 
 @njit
-def init_synth_filterbank_block():
+def init_synth_filter_bank_block():
     """
-    init synth filterbank block
-    :return: synth filterbank block
+    init synth filter_bank block
+
+    :return: synth filter_bank block
     :rtype np.ndarray
     """
     n = np.zeros((64, 32))
@@ -31,7 +32,7 @@ def init_synth_filterbank_block():
 @njit
 def create_sine_block():
     """
-    :return:
+    :return: sine block
     :rtype: np.ndarray
     """
     sine_block = np.zeros((4, 36))
@@ -61,11 +62,11 @@ def create_sine_block():
 
 
 @njit
-def synth_filterbank(gr: int, ch: int, samples, fifo, synth_filterbank_block):
+def synth_filter_bank(gr: int, ch: int, samples, fifo, synth_filter_bank_block):
     """
-    :param synth_filterbank_block:
-    :param fifo:
-    :param samples:
+    :param synth_filter_bank_block: self.__synth_filter_bank_block
+    :param fifo: self.__fifo
+    :param samples: the sample array
     :param gr: the granule
     :param ch: the channel
     """
@@ -82,7 +83,7 @@ def synth_filterbank(gr: int, ch: int, samples, fifo, synth_filterbank_block):
         for i in range(64):
             fifo[ch][i] = 0.0
             for j in range(32):
-                fifo[ch][i] += s[j] * synth_filterbank_block[i][j]
+                fifo[ch][i] += s[j] * synth_filter_bank_block[i][j]
 
         for i in range(8):
             for j in range(32):
@@ -106,10 +107,11 @@ def imdct(gr: int, ch: int, block_type, samples, sine_block, prev_samples):
     """
     Inverted modified discrete cosine transformations (IMDCT) are applied to each sample and are afterwards windowed
     to fit their window shape. As an addition, the samples are overlapped.
-    :param prev_samples:
-    :param sine_block:
-    :param samples:
-    :param block_type:
+
+    :param prev_samples: self.__prev_samples
+    :param sine_block: self.__sine_block,
+    :param samples: self.__samples
+    :param block_type: self.side_info.block_type
     :param gr: the granule
     :param ch: the channel
     """
@@ -152,22 +154,22 @@ def imdct(gr: int, ch: int, block_type, samples, sine_block, prev_samples):
 
 
 @njit
-def requantize(gr: int, ch: int, scalefac_scale, block_type, mixed_block_flag,
-               short_win, global_gain, scalefac_s, long_win, scalefac_l, preflag,
-               samples, subblock_gain):
+def re_quantize(gr: int, ch: int, scale_fac_scale, block_type, mixed_block_flag, short_win, global_gain, scale_fac_s,
+                long_win, scale_fac_l, pre_flag, samples, sub_block_gain):
     """
     The reduced samples are rescaled to their original scales and precisions.
-    :param subblock_gain:
-    :param samples:
-    :param preflag:
-    :param scalefac_l:
-    :param long_win:
-    :param scalefac_s:
-    :param global_gain:
-    :param short_win:
-    :param mixed_block_flag:
-    :param block_type:
-    :param scalefac_scale:
+
+    :param sub_block_gain: self.__side_info.sub_block_gain
+    :param samples: self.__samples
+    :param pre_flag: self.side_info.pre_flag,
+    :param scale_fac_l: self.side_info.scale_fac_l
+    :param long_win: self.__header.band_index.long_win
+    :param scale_fac_s: self.side_info.scale_fac_s
+    :param global_gain: self.side_info.global_gain
+    :param short_win: self.__header.band_width.short_win
+    :param mixed_block_flag: self.side_info.mixed_block_flag
+    :param block_type: self.side_info.block_type
+    :param scale_fac_scale: self.side_info.scale_fac_scale
     :param gr: the granule
     :param ch: the channel
     """
@@ -175,7 +177,7 @@ def requantize(gr: int, ch: int, scalefac_scale, block_type, mixed_block_flag,
     exp2: float
     window = 0
     sfb = 0
-    SCALEFAC_MULT = 0.5 if scalefac_scale[gr][ch] == 0 else 1
+    SCALE_FAC_MULT = 0.5 if scale_fac_scale[gr][ch] == 0 else 1
 
     sample = 0
     i = 0
@@ -190,9 +192,9 @@ def requantize(gr: int, ch: int, scalefac_scale, block_type, mixed_block_flag,
                 else:
                     window += 1
 
-            exp1 = global_gain[gr][ch] - 210.0 - 8.0 * subblock_gain[gr][ch][
+            exp1 = global_gain[gr][ch] - 210.0 - 8.0 * sub_block_gain[gr][ch][
                 window]
-            exp2 = SCALEFAC_MULT * scalefac_s[gr][ch][window][sfb]
+            exp2 = SCALE_FAC_MULT * scale_fac_s[gr][ch][window][sfb]
         else:
             if sample == long_win[sfb + 1]:
                 # Don't increment sfb at the zeroth sample.
@@ -200,9 +202,9 @@ def requantize(gr: int, ch: int, scalefac_scale, block_type, mixed_block_flag,
 
             exp1 = global_gain[gr][ch] - 210.0
 
-            pretab_val = tables.pretab[sfb] if sfb < len(tables.pretab) else 0
-            exp2 = SCALEFAC_MULT * (
-                    scalefac_l[gr][ch][sfb] + preflag[gr][ch] * pretab_val)
+            pre_tab_val = tables.pre_tab[sfb] if sfb < len(tables.pre_tab) else 0
+            exp2 = SCALE_FAC_MULT * (
+                    scale_fac_l[gr][ch][sfb] + pre_flag[gr][ch] * pre_tab_val)
 
         sign = -1.0 if samples[gr][ch][sample] < 0 else 1.0
         a = pow(abs(samples[gr][ch][sample]), 4.0 / 3.0)
@@ -234,7 +236,7 @@ class Frame:
         self.__main_data: list = []
         self.__samples: np.ndarray = np.zeros((2, 2, NUM_OF_SAMPLES))
         self.__sine_block: np.ndarray = create_sine_block()
-        self.__synth_filterbank_block: np.ndarray = init_synth_filterbank_block()
+        self.__synth_filter_bank_block: np.ndarray = init_synth_filter_bank_block()
 
         self.all_huffman_tables: list = []
 
@@ -261,11 +263,11 @@ class Frame:
 
         for gr in range(2):
             for ch in range(self.__header.channels):
-                requantize(gr, ch, self.side_info.scalefac_scale, self.side_info.block_type,
-                           self.side_info.mixed_block_flag, self.__header.band_width.short_win,
-                           self.side_info.global_gain, self.side_info.scalefac_s,
-                           self.__header.band_index.long_win, self.side_info.scalefac_l, self.side_info.preflag,
-                           self.__samples, self.__side_info.subblock_gain)
+                re_quantize(gr, ch, self.side_info.scale_fac_scale, self.side_info.block_type,
+                            self.side_info.mixed_block_flag, self.__header.band_width.short_win,
+                            self.side_info.global_gain, self.side_info.scale_fac_s, self.__header.band_index.long_win,
+                            self.side_info.scale_fac_l, self.side_info.pre_flag, self.__samples,
+                            self.__side_info.sub_block_gain)
 
             if self.__header.channel_mode == ChannelMode.JointStereo and self.__header.mode_extension[0]:
                 self.__ms_stereo(gr)
@@ -278,7 +280,7 @@ class Frame:
 
                 imdct(gr, ch, self.side_info.block_type, self.__samples, self.__sine_block, self.__prev_samples)
                 self.__frequency_inversion(gr, ch)
-                synth_filterbank(gr, ch, self.__samples, self.__fifo, self.__synth_filterbank_block)
+                synth_filter_bank(gr, ch, self.__samples, self.__fifo, self.__synth_filter_bank_block)
 
         self.__interleave()
 
@@ -355,98 +357,99 @@ class Frame:
         for gr in range(2):
             for ch in range(self.__header.channels):
                 max_bit = int(bit + self.__side_info.part2_3_length[gr][ch])
-                bit = self.__unpack_scalefac(gr, ch, bit)
+                bit = self.__unpack_scale_fac(gr, ch, bit)
                 self.__unpack_samples(gr, ch, bit, max_bit)
                 bit = max_bit
 
-    def __unpack_scalefac(self, gr: int, ch: int, bit: int):
+    def __unpack_scale_fac(self, gr: int, ch: int, bit: int):
         """
         Unpack the scale factor indices from the main data. slen1 and slen2 are the size (in bits) of each scaling
         factor. There are 21 scaling factors for long windows and 12 for each short window.
 
         :param gr: the granule
         :param ch: the channel
-        :param bit:
+        :param bit: the starting offset of the scale factors in the main data
         """
         sfb: int
         window: int
-        scalefactor_length = [slen[int(self.__side_info.scalefac_compress[gr][ch])][0],
-                              slen[int(self.__side_info.scalefac_compress[gr][ch])][1]]
+        scale_factor_length = [slen[int(self.__side_info.scale_fac_compress[gr][ch])][0],
+                               slen[int(self.__side_info.scale_fac_compress[gr][ch])][1]]
 
         # No scale factor transmission for short blocks.
         if self.__side_info.block_type[gr][ch] == 2 and self.__side_info.window_switching[gr][ch]:
             if self.__side_info.mixed_block_flag[gr][ch] == 1:  # Mixed blocks.
                 for sfb in range(8):
-                    self.__side_info.scalefac_l[gr][ch][sfb] = util.get_bits(self.__main_data, bit,
-                                                                             scalefactor_length[0])
-                    bit += scalefactor_length[0]
+                    self.__side_info.scale_fac_l[gr][ch][sfb] = util.get_bits(self.__main_data, bit,
+                                                                              scale_factor_length[0])
+                    bit += scale_factor_length[0]
 
                 for sfb in range(3, 6):
                     for window in range(3):
-                        self.__side_info.scalefac_s[gr][ch][window][sfb] = util.get_bits(self.__main_data,
-                                                                                         bit, scalefactor_length[0])
-                        bit += scalefactor_length[0]
+                        self.__side_info.scale_fac_s[gr][ch][window][sfb] = util.get_bits(self.__main_data,
+                                                                                          bit, scale_factor_length[0])
+                        bit += scale_factor_length[0]
             else:  # Short blocks.
                 for sfb in range(6):
                     for window in range(3):
-                        self.__side_info.scalefac_s[gr][ch][window][sfb] = util.get_bits(self.__main_data,
-                                                                                         bit, scalefactor_length[0])
-                        bit += scalefactor_length[0]
+                        self.__side_info.scale_fac_s[gr][ch][window][sfb] = util.get_bits(self.__main_data,
+                                                                                          bit, scale_factor_length[0])
+                        bit += scale_factor_length[0]
 
             for sfb in range(6, 12):
                 for window in range(3):
-                    self.__side_info.scalefac_s[gr][ch][window][sfb] = util.get_bits(self.__main_data, bit,
-                                                                                     scalefactor_length[1])
-                    bit += scalefactor_length[1]
+                    self.__side_info.scale_fac_s[gr][ch][window][sfb] = util.get_bits(self.__main_data, bit,
+                                                                                      scale_factor_length[1])
+                    bit += scale_factor_length[1]
 
             for window in range(3):
-                self.__side_info.scalefac_s[gr][ch][window][12] = 0
+                self.__side_info.scale_fac_s[gr][ch][window][12] = 0
 
         # Scale factors for long blocks.
         else:
             if gr == 0:
                 for sfb in range(11):
-                    self.__side_info.scalefac_l[gr][ch][sfb] = util.get_bits(self.__main_data, bit,
-                                                                             scalefactor_length[0])
-                    bit += scalefactor_length[0]
+                    self.__side_info.scale_fac_l[gr][ch][sfb] = util.get_bits(self.__main_data, bit,
+                                                                              scale_factor_length[0])
+                    bit += scale_factor_length[0]
                 for sfb in range(11, 21):
-                    self.__side_info.scalefac_l[gr][ch][sfb] = util.get_bits(self.__main_data, bit,
-                                                                             scalefactor_length[1])
-                    bit += scalefactor_length[1]
+                    self.__side_info.scale_fac_l[gr][ch][sfb] = util.get_bits(self.__main_data, bit,
+                                                                              scale_factor_length[1])
+                    bit += scale_factor_length[1]
             else:  # Scale factors might be reused in the second granule.
                 SB = [6, 11, 16, 21]
                 PREV_SB = [0, 6, 11, 16]
                 for i in range(2):
                     for sfb in range(PREV_SB[i], SB[i]):
                         if self.__side_info.scfsi[ch][i]:
-                            self.__side_info.scalefac_l[gr][ch][sfb] = self.__side_info.scalefac_l[0][ch][sfb]
+                            self.__side_info.scale_fac_l[gr][ch][sfb] = self.__side_info.scale_fac_l[0][ch][sfb]
                         else:
-                            self.__side_info.scalefac_l[gr][ch][sfb] = util.get_bits(self.__main_data, bit,
-                                                                                     scalefactor_length[0])
-                            bit += scalefactor_length[0]
+                            self.__side_info.scale_fac_l[gr][ch][sfb] = util.get_bits(self.__main_data, bit,
+                                                                                      scale_factor_length[0])
+                            bit += scale_factor_length[0]
                 for i in range(2, 4):
                     for sfb in range(PREV_SB[i], SB[i]):
                         if self.__side_info.scfsi[ch][i]:
-                            self.__side_info.scalefac_l[gr][ch][sfb] = self.__side_info.scalefac_l[0][ch][sfb]
+                            self.__side_info.scale_fac_l[gr][ch][sfb] = self.__side_info.scale_fac_l[0][ch][sfb]
                         else:
-                            self.__side_info.scalefac_l[gr][ch][sfb] = util.get_bits(self.__main_data, bit,
-                                                                                     scalefactor_length[1])
-                            bit += scalefactor_length[1]
+                            self.__side_info.scale_fac_l[gr][ch][sfb] = util.get_bits(self.__main_data, bit,
+                                                                                      scale_factor_length[1])
+                            bit += scale_factor_length[1]
 
-            self.__side_info.scalefac_l[gr][ch][21] = 0
+            self.__side_info.scale_fac_l[gr][ch][21] = 0
 
         return bit
 
-    def __unpack_samples(self, gr, ch, bit, max_bit):
+    def __unpack_samples(self, gr: int, ch: int, bit: int, max_bit: int):
         """
         The Huffman bits (part3) will be unpacked. Four bytes are retrieved from the bit stream, and are consecutively
         evaluated against values of the selected Huffman tables.
         | big_value | big_value | big_value | quadruple | zero |
         Each hit gives two samples.
+
         :param gr: the granule
         :param ch: the channel
-        :param bit:
-        :param max_bit:
+        :param bit: the starting offset of the scale factors in the main data
+        :param max_bit: the ending offset of the scale factors and the huffman encoded data of the current gr and ch.
         """
         for i in range(NUM_OF_SAMPLES):
             self.__samples[gr][ch][i] = 0
@@ -558,6 +561,7 @@ class Frame:
         """
         The left and right channels are added together to form the middle channel. The
         difference between each channel is stored in the side channel.
+
         :param gr: the granule
         """
         for sample in range(NUM_OF_SAMPLES):
@@ -569,9 +573,9 @@ class Frame:
     def __reorder(self, gr: int, ch: int):
         """
         Reorder short blocks, mapping from scalefactor subbands (for short windows) to 18 sample blocks.
+
         :param gr: the granule
         :param ch: the channel
-        :return:
         """
         total = 0
         start = 0
@@ -626,6 +630,9 @@ class Frame:
                 self.__samples[gr][ch][i * 18 + sb] *= -1
 
     def __interleave(self):
+        """
+        puts the samples to the pcm list.
+        """
         for gr in range(2):
             for sample in range(576):
                 for ch in range(self.__header.channels):
