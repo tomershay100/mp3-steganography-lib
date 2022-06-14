@@ -754,7 +754,7 @@ class MP3Encoder:
 
                 # all spectral values zero
                 if self.__l3loop.xrmax:
-                    cod_info.part2_3_length = self.__shine_outer_loop(max_bits, ix, gr, ch)
+                    cod_info.part2_3_length = self.__outer_loop(max_bits, ix, gr, ch)
                     self.__hide_str_offset += int(cod_info.table_select[0] > 0) + int(
                         cod_info.table_select[1] > 0) + int(cod_info.table_select[2] > 0)
 
@@ -882,7 +882,7 @@ class MP3Encoder:
 
         return max_bits
 
-    def __shine_outer_loop(self, max_bits, ix, gr, ch):
+    def __outer_loop(self, max_bits, ix, gr, ch):
         """
         Function: The outer iteration loop controls the masking conditions of all scalefactorbands.
         It computes the best scalefac and global gain. This module calls the inner iteration loop.
