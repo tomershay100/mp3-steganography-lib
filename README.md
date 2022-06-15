@@ -24,23 +24,18 @@ This is a steganography library in python for hiding strings in mp3 files.
 
 ### Background
 
-This python library allows the user to hide strings inside ``MP3`` files, extract the hidden strings from ``MP3`` file,
+This python library allows a user to hide strings inside ``MP3`` files, extract the hidden strings from ``MP3`` file,
 clean a ``MP3`` file from hidden strings in it and generally allows to convert ``MP3`` files to ``WAV`` (decoding
 process) files and vice versa (encoding process).
 
 ### Project Description
 
-The steganography process uses and modifies huffman tables as presented in the research article "_High capacity
+The steganography process uses and modifies the selection of the optimal (that requires the minimal amount of bits to code the data) huffman tables as presented in the research article "_High capacity
 reversible data hiding in MP3 based on Huffman table
 transformation_" (which can be found [here](https://www.aimspress.com/fileOther/PDF/MBE/mbe-16-04-158.pdf)). Quite
-simply, the idea is to be able to hide bits by changing the huffman tables. Each frame in the ``MP3`` file uses several
-huffman tables (one per granule, channel and regin - a total of 8-12 tables).
+simply, the idea is to be able to hide bits by changing the selection of the used huffman tables. Each frame in the ``MP3`` file uses several huffman tables (one per granule, channel and region - a total of 8-12 tables).
 
-Unofficially, they found pairs of tables, according to their similarities and determined that each would be for the bit
-0 or the bit 1. For the sake of demonstration let us assume that the huffman table x and the huffman y table are a pair,
-and that x is for the bit 0 and y for the bit 1. Now to hide a bit, given that the huffman table x has been used, it
-must be replaced with the huffman table y if the bit is 1 or to keep the huffman table x if the bit is 0. An inverted
-case will happen for original use of table y. Thus, all 30 huffman tables that use (out of 32) ``MP3`` files, are
+<!-- For the steganography we ordered the tables as pairs (according to the article) according to their similarities, and determined that each table represent the bit 0 or 1. For the sake of demonstration let us assume that the huffman table x and the huffman y table are a pair, and that x represents the bit 0 and y represents bit 1. To hide a bit, given that the huffman table x has been selected as the optimal table, it is replaced with the huffman table y if the bit is 1, otherwise is kept the table x if the bit we want to hide is 0. An inverted case will happen for original use of table y. Thus, all 30 huffman tables that are used to encode (out of 32) ``MP3`` data, are -->
 divided into pairs and each time you see a huffman table z - replace it with the huffman table that matches the next bit
 you want to hide.
 
