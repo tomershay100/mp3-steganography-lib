@@ -42,33 +42,31 @@ For the steganography we ordered the tables as pairs according to their similari
 The library is contains several packages and several classes built as follows:
 
 1. `decoder` package:
-    * **Frame class:** contains all the information about the current ``MP3`` frame that been decoded.
-    * **FrameHeader class:** contains all the information about the current ``MP3`` frame header that been decoded.
-    * **FrameSideInformation class:** contains all the information about the current ``MP3`` frame side-information that
-      been decoded.
-    * **MP3Parser class:** performs the actual decoding process while going through all the frames of the file.
+    * **Frame class:** contains all the information about the current ``MP3`` frame that is decoded.
+    * **FrameHeader class:** contains all the information about the current ``MP3`` frame's header is decoded.
+    * **FrameSideInformation class:** contains all the information about the current ``MP3`` frame's side-information is decoded.        
+    * **MP3Parser class:** performs the decoding process while parsing the frames of the file.
     * **ID3Parser class:** performs the decoding process on the ``METADATA`` of the ``MP3``` file.
-    * **tables file:** contains all the tables that been used in the decoding process.
+    * **tables file:** contains all the tables that is used in the decoding process.
     * **util file:** contains all the different functions and dataclasses that other classes use frequently like
-      mathematical calculations and bit conversions.
+      mathematical calculations and bit operations.
     * **Decoder class:** consolidates the ``MP3`` decoding process. Receives paths to files and takes
       care of the decoding process while printing information, creating files and analyzing the ``METADATA``.
 2. `encoder` package:
-    * **WAVReader class:** contains all the information about the ``WAV`` file that been encoded.
-    * **MP3Encoder class:** performs the actual encoding process.
-    * **ID3Parser class:** performs the decoding process on the ``METADATA`` of the ``MP3``` file.
-    * **tables file:** contains all the tables that been used in the encoding process.
+    * **WAVReader class:** contains all the information about the ``WAV`` file that is encoded.
+    * **MP3Encoder class:** performs the encoding process.
+    * **tables file:** contains all the tables that is used in the encoding process.
     * **util file:** contains all the different functions and dataclasses that other classes use frequently like
-      mathematical calculations and bit conversions.
+      mathematical calculations and bit operations.
     * **Encoder class:** consolidates the ``MP3`` encoding process. Receives paths to files and takes
       care of the encoding process while printing information, creating files.
-3. **Steganography class:** serves as a kind of Façade and allow the user to perform operations on his ``MP3``
+3. **Steganography class:** serves as a kind of Façade and allows the user to perform operations on given ``MP3``
    and ``WAV`` files. The possible actions are:
     * decode ``MP3`` file to ``WAV`` file.
     * encode ``WAV`` file to ``MP3`` file.
-    * hide string in ``MP3`` file.
-    * reveal string in ``MP3`` file.
-    * clean ``MP3`` file from any string.
+    * hide a string in the ``MP3`` file.
+    * reveal a string hidden in the ``MP3`` file.
+    * clean a ``MP3`` file from hidden strings that it might hide.
 
 You can see more information about the class hierarchy
 in [UML](https://github.com/tomershay100/mp3-steganography-lib/blob/main/src/uml.png).
@@ -94,7 +92,7 @@ Steganography Class API:
   
   stego = Steganography(quiet=True)
     ```
-    * ``quiet: bool``: boolean value for the function to print information or not (default value ``True``).
+    * ``quiet: bool``: boolean value for the constructor of the Steganography class that determines if the information about the decoding/encoding process will be printed (default value ``True``).
 * for encoding ``WAV`` file into ``MP3`` file you may use
     ```python 
     stego = Steganography(quiet=True)
@@ -102,7 +100,7 @@ Steganography Class API:
     ```
     * ``wav_file_path: str``: file path for the ``WAV`` file.
     * ``output_file_path: str``: file path for the output ``MP3`` file.
-    * ``bitrate: int``: the bitrate to be used in the encoding process (default value is ``320``). You may use bitrate
+    * ``bitrate: int``: the bitrate that is used in the encoding process (default value is ``320``). You may use bitrate
       from ``32Kb`` to ``420Kb`` in jumps of ``32Kb``.
 * For decoding ``MP3`` file into ``WAV`` file you may use
     ```python 
@@ -111,7 +109,7 @@ Steganography Class API:
     ```
     * ``input_file_path: str``: file path for the ``MP3`` file.
     * ``wav_file_path: str``: file path for the output ``WAV`` file (default value=```input_file_path[:-4] + ".wav"```).
-* For hiding string in ``MP3`` file you may use
+* For hiding a string in ``MP3`` file you may use
     ```python 
     stego = Steganography(quiet=True)
     stego.hide_message("input.mp3", "output.mp3", "String to hide in the file")
@@ -120,16 +118,15 @@ Steganography Class API:
     * ``output_file_path: str``: file path for the output ``MP3`` file.
     * ``message: str``: the message to hide in the file.
     * ``wav_file_path: str``: file path for the output ``WAV`` file (default value=```input_file_path[:-4] + ".wav"```).
-    * ``delete_wav: bool``: boolean value for the decoding process to delete the wav file or not (default
-      value ``True``).
-* For revealing string from ``MP3`` file you may use
+    * ``delete_wav: bool``: boolean value for the decoding process that determines if the wav file that is created from the decodin process will be deleted. (default value ``True``).
+* For revealing a string from a ``MP3`` file you may use
     ```python 
     stego = Steganography(quiet=True)
     stego.reveal_massage("input.mp3", "results.txt")
     ```
     * ``input_file_path: str``: file path for the input ``MP3`` file.
-    * ``txt_file_path: str``: file path for the results to be written to.
-* For cleaning ``MP3`` file you may use
+    * ``txt_file_path: str``: file path for the hidden string to be written to.
+* For cleaning ``MP3`` file from a hidden string you may use
     ```python 
     stego = Steganography(quiet=True)
     stego.clear_file("input.mp3", "output.mp3")
