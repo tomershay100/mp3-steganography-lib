@@ -55,7 +55,7 @@ The library is contains several packages and several classes built as follows:
 2. `encoder` package:
     * **WAVReader class:** contains all the information about the ``WAV`` file that is encoded.
     * **MP3Encoder class:** performs the encoding process.
-    * **tables file:** contains all the tables that is used in the encoding process.
+    * **tables file:** contains all the tables that are used in the encoding process.
     * **util file:** contains all the different functions and dataclasses that other classes use frequently like
       mathematical calculations and bit operations.
     * **Encoder class:** consolidates the ``MP3`` encoding process. Receives paths to files and takes
