@@ -33,9 +33,9 @@ process) files and vice versa (encoding process).
 The steganography process uses and modifies the selection of the optimal (that requires the minimal amount of bits to code the data) Huffman tables as presented in the research article "_High capacity
 reversible data hiding in MP3 based on Huffman table
 transformation_" (which can be found [here](https://www.aimspress.com/fileOther/PDF/MBE/mbe-16-04-158.pdf)). Quite
-simply, the idea is to be able to hide bits by changing the selection of the used Huffman tables. Each frame in the ``MP3`` file uses several Huffman tables (one per granule, channel and region - a total of 8-12 tables).
+simply, the idea is to be able to hide bits by changing the selection of the used Huffman table indexes. Each frame in the ``MP3`` file uses several Huffman tables (one per granule, channel and region - a total of 8-12 tables).
 
-For the steganography we ordered the tables as pairs according to their similarities (from the article), and determined that each table represent the bit 0 or 1. For the sake of demonstration let us assume that the Huffman table x and the Huffman y table are a pair, and that x represents the bit 0 and y represents bit 1. To hide a bit, given that the Huffman table x has been selected as the optimal table, it is replaced with the Huffman table y if the bit is 1, otherwise the table x is selected. An inverted case will happen for original use of table y. 
+For the steganography we ordered the tables as pairs according to their similarities (from the article), and determined that each table represent the bit 0 or 1. For the sake of demonstration let us assume that the Huffman table x and the Huffman table y are a pair, and that x represents the bit 0 and y represents bit 1. To hide a bit, given that the Huffman table x has been selected as the optimal table, it is replaced with the Huffman table y if the bit is 1, otherwise the table x is selected. An inverted case will happen for original use of table y. 
 
 ### Project Structure
 
