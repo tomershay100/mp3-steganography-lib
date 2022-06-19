@@ -47,7 +47,7 @@ The library is contains several packages and several classes built as follows:
     * **FrameSideInformation class:** contains all the information about the current ``MP3`` frame's side-information is decoded.        
     * **MP3Parser class:** performs the decoding process while parsing the frames of the file.
     * **ID3Parser class:** performs the decoding process on the ``METADATA`` of the ``MP3``` file.
-    * **tables file:** contains all the tables that is used in the decoding process.
+    * **tables file:** contains all the tables that are used in the decoding process.
     * **util file:** contains all the different functions and dataclasses that other classes use frequently like
       mathematical calculations and bit operations.
     * **Decoder class:** consolidates the ``MP3`` decoding process. Receives paths to files and takes
