@@ -32,6 +32,7 @@ def init_synth_filter_bank_block():
 @njit
 def create_sine_block():
     """
+    This creates a sine block, a mathematical object relevant for IMDCT. Should only be created once
     :return: sine block
     :rtype: np.ndarray
     """

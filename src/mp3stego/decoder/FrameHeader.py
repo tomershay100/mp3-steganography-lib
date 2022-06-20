@@ -104,7 +104,7 @@ class FrameHeader:
 
     def __set_emphasis(self):
         """
-        Although rarely used, there is no method for emphasis.
+        Although rarely used, info about emphasis can be found in the header. There is no method for emphasis.
         """
         value = ((self.__buffer[3] << 6) % MAX_BYTE_VALUE >> 6) % MAX_BYTE_VALUE
         self.__emphasis = Emphasis(value)

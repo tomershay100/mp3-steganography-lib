@@ -383,7 +383,7 @@ def quantize(ix, step_size, step_tab_i, xr_max, xr, int2idx, step_tab, xr_abs):
     :param ix: self.__l3_enc[ch][gr], vector of quantized values ix(0..575)
     :param step_size: the quantization step size
 
-    :return: the step size
+    :return: the quantizer step size
     """
     ix_max = 0
     scalei = step_tab_i[step_size + 127]  # 2**(-stepsize/4)
@@ -659,9 +659,7 @@ class MP3Encoder:
 
         for ch in range(self.__wav_file.num_of_channels - 1, -1, -1):
             for gr in range(self.__mpeg.granules_per_frame):
-                # set up pointer to the part of config.mdct_freq we're using
-                # mdct_enc = self.__mdct_freq[ch][gr]
-
+                
                 # polyphase filtering
                 for k in range(0, 18, 2):
                     self.__replace_samples(ch)
@@ -760,7 +758,7 @@ class MP3Encoder:
 
     def __iteration_loop(self):
         """
-        bit and noise allocation. contains the distortion control loop and the  rate control loop.
+        bit and noise allocation. contains the distortion control loop and the rate control loop.
         """
         for ch in range(self.__wav_file.num_of_channels):
             for gr in range(self.__mpeg.granules_per_frame):
@@ -824,7 +822,7 @@ class MP3Encoder:
         """
         l3_side = self.__side_info
 
-        # This is the scfsi_band table from 2.4.2.7 of the IS
+        # This is the scfsi_band table from the IS
         scfsi_band_long = [0, 6, 11, 16, 21]
         condition = 0
 
@@ -1394,7 +1392,7 @@ class MP3Encoder:
 
     def __huffman_code_bits(self, gr, ch):
         """
-        Code the data according to the huffman table.
+        Code the data in all regions according to the huffman table chosen.
 
         :param gr: the granule
         :param ch: the channel
@@ -1448,8 +1446,9 @@ class MP3Encoder:
 
     def __huffman_code(self, table_select, x, y):
         """
+        Codes a pair of values x,y to the Huffman codeword in chosen table
         :param table_select: the huffman table index
-        :param x: self.__l3_enc[ch][gr][i]
+        :param x: self.__l3_enc[ch][gr][i] 
         :param y: self.__l3_enc[ch][gr][i + 1]
         """
         ext = 0
@@ -1514,6 +1513,7 @@ class MP3Encoder:
 
     def __huffman_coder_count1(self, huf_table, v, w, x, y):
         """
+        Huffman encoding for count1 region.
         :param huf_table: the huffman table index
         :param v: v,w,x,y are adjacent quantize values in self.__l3_enc[ch][gr]
         :param w: v,w,x,y are adjacent quantize values in self.__l3_enc[ch][gr]
