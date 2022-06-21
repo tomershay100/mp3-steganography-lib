@@ -24,7 +24,7 @@ class Encoder:
         self.__output_file_path: str = output_file_path
 
         if not os.path.exists(self.__file_path):
-            sys.exit('File not found.')
+            sys.exit(f'File {self.__file_path} not found.')
 
         self.__wav_file: WavReader = WavReader(self.__file_path, bitrate)
         self.__hide_str: str = hide_str

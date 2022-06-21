@@ -62,7 +62,7 @@ class Steganography:
     @staticmethod
     def __file_existence(file: str):
         if not os.path.exists(file):
-            sys.exit('File not found.')
+            sys.exit(f'File {file} not found.')
 
     def __check_for_decoder(self, input_file_path: str, wav_file_path: str = ""):
         self.__file_existence(input_file_path)

@@ -23,22 +23,29 @@ class SteganographyTestCase(unittest.TestCase):
         """
         Test the hiding when the message is short enough.
         """
-        too_long = self.stego.hide_message('test.mp3', 'out.mp3', message='ddd')
+        input_path = os.path.abspath("test.mp3")
+        output_mp3_path = os.getcwd() + "/out1.mp3"
+        too_long = self.stego.hide_message(input_path, output_mp3_path, message='ddd')
         self.assertEqual(too_long, False)
 
     def test_too_long_hiding(self):
         """
         Test the hiding when the message is too long.
         """
-        too_long = self.stego.hide_message('test.mp3', 'out1.mp3', message='ddd' * 100)
+        input_path = os.path.abspath("test.mp3")
+        output_mp3_path = os.getcwd() + "/out2.mp3"
+        too_long = self.stego.hide_message(input_path, output_mp3_path, message='ddd' * 100)
         self.assertEqual(too_long, True)
 
     def test_reveal_hiding(self):
         """
         Test the revealing message from mp3 file.
         """
-        self.stego.hide_message('test.mp3', 'out.mp3', message='ddd')
-        self.stego.reveal_massage('out.mp3', "reveal.txt")
+        input_path = os.path.abspath("test.mp3")
+        output_mp3_path = os.getcwd() + "/out3.mp3"
+        reveal_txt_path = os.getcwd() + "/reveal.txt"
+        self.stego.hide_message(input_path, output_mp3_path, message='ddd')
+        self.stego.reveal_massage('out.mp3', reveal_txt_path)
 
         with open("reveal.txt") as f:
             message = f.read()

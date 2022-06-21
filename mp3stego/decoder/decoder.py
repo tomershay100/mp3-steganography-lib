@@ -21,7 +21,7 @@ class Decoder:
         self.__output_file_path: str = output_file_path
 
         if not os.path.exists(self.__file_path):
-            sys.exit('File not found.')
+            sys.exit(f'File {self.__file_path} not found.')
 
         with open(self.__file_path, 'rb') as f:
             self.__hex_data: list = [c for c in f.read()]
