@@ -40,7 +40,7 @@ class Steganography:
         self.__bitrate: int
 
     def __encode(self, wav_file_path: str, output_file_path: str, bitrate: int = 320, quiet: bool = True,
-                 hide: bool = False, massage: str = ""):
+                 hide: bool = False, massage: str = "") -> bool:
         binary_str = ""
         if hide:
             massage = str(len(massage)) + "#" + massage
@@ -134,7 +134,7 @@ class Steganography:
         if not self.quiet:
             print(f"\nFinished Revealing.\n##################")
 
-    def hide_message(self, input_file_path: str, output_file_path: str, message: str):
+    def hide_message(self, input_file_path: str, output_file_path: str, message: str) -> bool:
         """
         Allow hiding string in mp3 file. The function creates the new mp3 file with the string hidden in it.
 
