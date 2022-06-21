@@ -1,0 +1,1 @@
+from mp3stego.steganography import Steganography
