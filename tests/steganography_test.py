@@ -1,3 +1,4 @@
+import os
 import unittest
 
 from tests import Steganography
@@ -10,6 +11,8 @@ class SteganographyTestCase(unittest.TestCase):
     def test_test(self):
         with open('readme.txt', 'w') as f:
             f.write('Create a new text file!')
+        os.remove("readme.txt")
+
     # def test_decoder_encoder(self):
     #     """
     #     Test the encoding and decoding process.
