@@ -15,6 +15,7 @@ class SteganographyTestCase(unittest.TestCase):
         if not os.path.exists('readme.txt'):
             sys.exit('File not found.')
         os.remove("readme.txt")
+        self.stego.decode_mp3_to_wav('test.mp3', 'out.wav')
 
     # def test_decoder_encoder(self):
     #     """
