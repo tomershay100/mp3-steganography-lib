@@ -1,4 +1,5 @@
 import os
+import sys
 import unittest
 
 from tests import Steganography
@@ -11,6 +12,8 @@ class SteganographyTestCase(unittest.TestCase):
     def test_test(self):
         with open('readme.txt', 'w') as f:
             f.write('Create a new text file!')
+        if not os.path.exists('readme.txt'):
+            sys.exit('File not found.')
         os.remove("readme.txt")
 
     # def test_decoder_encoder(self):
