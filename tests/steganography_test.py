@@ -1,3 +1,4 @@
+import os
 import unittest
 
 from tests import Steganography
@@ -11,9 +12,12 @@ class SteganographyTestCase(unittest.TestCase):
         """
         Test the encoding and decoding process.
         """
-        bitrate = self.stego.decode_mp3_to_wav('test.mp3', 'out.wav')
+        input_path = os.path.abspath("test.mp3")
+        output_wav_path = os.getcwd() + "/out.wav"
+        output_mp3_path = os.getcwd() + "/out.mp3"
+        bitrate = self.stego.decode_mp3_to_wav(input_path, output_wav_path)
         self.assertEqual(bitrate, 320)
-        self.stego.encode_wav_to_mp3('out.wav', 'out.mp3', bitrate)
+        self.stego.encode_wav_to_mp3(output_wav_path, output_mp3_path, bitrate)
 
     def test_hiding(self):
         """

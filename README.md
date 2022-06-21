@@ -69,7 +69,7 @@ The library is contains several packages and several classes built as follows:
     * clean a ``MP3`` file from hidden strings that it might hide.
 
 You can see more information about the class hierarchy
-in [UML](https://github.com/tomershay100/mp3-steganography-lib/blob/main/src/uml.png).
+in [UML](https://github.com/tomershay100/mp3-steganography-lib/blob/main/uml.png).
 
 ## Dependencies
 
