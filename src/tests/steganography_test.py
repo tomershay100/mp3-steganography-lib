@@ -1,6 +1,6 @@
 import unittest
 
-from mp3stego import Steganography
+from tests import Steganography
 
 
 class SteganographyTestCase(unittest.TestCase):
