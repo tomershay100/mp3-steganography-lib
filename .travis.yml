@@ -18,4 +18,4 @@ deploy:
   username: "__token__"
   password: "$PYPI_TOKEN"
   on:
-    branch: master
+    branch: main
