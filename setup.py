@@ -1,7 +1,7 @@
 from codecs import open
 from os import path
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 # The directory containing this file
 HERE = path.abspath(path.dirname(__file__))
@@ -36,7 +36,10 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    packages=["mp3stego, encoder, decoder"],
+    package_dir={"": "."},
+    packages=(
+        find_packages(where=".")
+    ),
     include_package_data=True,
     python_requires=">=3.9",
     install_requires=install_requires
