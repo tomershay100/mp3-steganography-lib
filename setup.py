@@ -19,7 +19,7 @@ if path.isfile(requirementPath):
 
 setup(
     name="mp3stego-lib",
-    version="1.1.6",
+    version="1.1.7",
     author="Aviad Seady, Tomer Shay, Lee Zaid",
     author_email="aviadevelops@gmail.com, tomershay100@gmail.com, lizizaid@gmail.com",
     description="mp3 steganography library",
@@ -36,7 +36,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    packages=["mp3stego"],
+    packages=["mp3stego, encoder, decoder"],
     include_package_data=True,
     python_requires=">=3.9",
     install_requires=install_requires

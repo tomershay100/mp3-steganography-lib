@@ -1,4 +1,4 @@
-from decoder import Decoder
-from encoder import Encoder
+from mp3stego.decoder import Decoder
+from mp3stego.encoder import Encoder
 
-from steganography import Steganography
+from mp3stego.steganography import Steganography
