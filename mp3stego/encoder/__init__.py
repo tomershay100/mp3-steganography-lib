@@ -1,1 +1,1 @@
-from mp3stego.encoder.encoder import Encoder
+from encoder import Encoder
