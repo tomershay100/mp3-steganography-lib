@@ -4,3 +4,7 @@
 /build/
 /dist/
 /mp3stego_lib.egg-info/
+__pycache__
+cleared.mp3
+out.mp3
+reveal.txt

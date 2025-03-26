@@ -8,6 +8,7 @@ from tqdm import tqdm
 from mp3stego.encoder import tables
 from mp3stego.encoder import util
 from mp3stego.encoder.WAV_Reader import WavReader
+from mp3stego.utils import safe_uint32
 
 NUM_OF_HUF_TABLES = 32
 
@@ -1437,11 +1438,11 @@ class MP3Encoder:
 
             # Due to the nature of the Huffman code tables, we will pad with ones * /
             while stuffing_words:
-                self.__put_bits(~0, 32)
+                self.__put_bits(safe_uint32(~0), 32)
                 stuffing_words -= 1
 
             if remaining_bits:
-                self.__put_bits(np.uint32(np.left_shift(np.uint32(np.uint64(1)), np.int(remaining_bits)) - 1),
+                self.__put_bits(np.uint32(np.left_shift(np.uint32(np.uint64(1)), np.int_(remaining_bits)) - 1),
                                 remaining_bits)
 
     def __huffman_code(self, table_select, x, y):
