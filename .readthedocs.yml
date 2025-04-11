@@ -14,8 +14,8 @@ formats: all
 
 build:
   os: ubuntu-22.04
-  commands:
-    - sphinx-build -b html docs/ docs/_build/html
+  tools:
+    python: "3.11"
 
 # ReadTheDocs.io need to install the dependencies to be able
 # to build the documentation automatically.
